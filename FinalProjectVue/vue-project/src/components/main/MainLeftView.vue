@@ -6,31 +6,28 @@
     <RouterLink
         v-for="menu in menus"
         :key="menu.to"
-        :class="{ select: menu.to === `${currentMenu}/${currentView}` }"
+        :class="{ select: isActive(menu.to) }"
         class="link"
         :to="menu.to"
     >
-      <img :src="menu.src" :alt="menu.alt" />
-      <br />
+      <img :src="menu.src" :alt="menu.alt"/>
+      <br/>
       {{ menu.label }}
     </RouterLink>
   </div>
 </template>
 
 <script setup>
-
 import {ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 
-const route = useRoute()
-const currentMenu = ref('');
-const currentView = ref('');
+const route = useRoute();
 
-watch(() => route.path, (path) => {
-  const [_, menu, view] = path.split('/');
-  currentMenu.value = menu;
-  currentView.value = view;
-}, {immediate: true});
+// 현재 라우트가 활성화된 메뉴를 판단하는 함수
+const isActive = (menuTo) => {
+  // 현재 라우트 경로와 menuTo 경로가 일치하는지 확인
+  return route.path === menuTo || route.path.startsWith(menuTo + '/');
+};
 
 const menus = [
   {
@@ -85,17 +82,9 @@ const menus = [
   margin-bottom: 75px;
 }
 
-/* .body{
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-} */
-
 .link {
   text-decoration: none;
   color: white;
-  /* background-color: black; */
   margin: 10px;
   width: 125px;
   height: 125px;
@@ -114,5 +103,4 @@ const menus = [
 .select {
   background-color: #b1def0;
 }
-
 </style>

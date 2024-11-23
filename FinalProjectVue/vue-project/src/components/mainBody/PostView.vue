@@ -1,15 +1,10 @@
 <template>
-    <div class="post">
-    </div>
   <RouterView/>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import PostList from './post/PostList.vue';
-import PostDetail from './post/PostDetail.vue';
-import PostRegist from './post/PostRegist.vue';
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 
 const route = useRoute()
 const currentMenu = ref('');

@@ -1,13 +1,13 @@
 <template>
-    <div>
-        식단관리 뷰
-    </div>
+  <div>
+    식단관리 뷰
+  </div>
   <RouterView/>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, watch} from 'vue';
+import {useRoute} from "vue-router";
 
 const route = useRoute()
 const currentMenu = ref('');

@@ -1,9 +1,9 @@
 <template>
   <div>
     <nav class="container">
-      <div v-for="menu in menus" class="menu">
+      <div v-for="menu in menus" :key="menu.index" class="menu">
+        <h2 v-if="menu.label === '체중 관리'" class="SSAFitLife">SSAFitLife</h2>
 
-        <h2 class="wintersleeping">WINTER SLEEPING</h2>
         <h1 class="title">{{ menu.label }}</h1>
 
         <div class="views">
@@ -43,7 +43,7 @@ const menus = [
     basePath: 'product-recommend',
     views: [
       {label: '보충제 추천', view: 'sup'},
-      {label: '가슴살 추천', view: 'chicken-breast'},
+      {label: '닭가슴살 추천', view: 'chicken-breast'},
     ]
   },
   {
@@ -57,7 +57,7 @@ const menus = [
 </script>
 
 <style scoped>
-.wintersleeping {
+.SSAFitLife {
   margin-top: 25px;
   font-size: 28px;
   color: #97d4e9;
@@ -106,7 +106,7 @@ const menus = [
   transition: 0.2s;
 }
 
-.container :hover.wintersleeping {
+.container :hover.SSAFitLife {
   color: white;
   transition: 0.2s;
 }
@@ -122,7 +122,7 @@ const menus = [
   transition: 0.2s;
 }
 
-.container :hover .wintersleeping {
+.container :hover .SSAFitLife {
   color: white;
   transition: 0.2s;
 }

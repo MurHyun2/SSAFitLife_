@@ -4,13 +4,13 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ssafitlife.food.model.dao.FoodLikeDislikeDao">
     <!-- 특정 음식에 대한 좋아요/싫어요 개수 조회 -->
-    <select id="selectByFoodNo" parameterType="int" resultType="int">
+    <select id="selectByFoodNo" parameterType="long" resultType="long">
         SELECT SUM(status)
         FROM Food_Like_Dislike
         WHERE food_no = #{foodNo}
     </select>
 
-    <select id="existsByFoodNoMemNo" parameterType="int" resultType="boolean">
+    <select id="existsByFoodNoMemNo" parameterType="FoodLikeDislike">
         SELECT COUNT(*) > 0
         FROM Food_Like_Dislike
         WHERE food_no = #{foodNo}
@@ -26,9 +26,14 @@
     <!-- 좋아요/싫어요 수정 -->
     <update id="updateLikeDislike" parameterType="FoodLikeDislike">
         UPDATE Food_Like_Dislike
-        SET food_no = #{foodNo},
-        mem_no = #{memNo},
-        status = #{status}
-        WHERE like_dislike_no = #{likeDislikeNo}
+        SET status = #{status}
+        WHERE food_no = #{foodNo}
+        AND mem_no = #{memNo};
     </update>
+
+    <delete id="deleteLikeDislike" parameterType="FoodLikeDislike">
+        DELETE FROM Food_Like_Dislike
+        WHERE food_no = #{foodNo}
+        AND mem_no = #{memNo};
+    </delete>
 </mapper>

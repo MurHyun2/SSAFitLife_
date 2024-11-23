@@ -14,14 +14,22 @@ public class FoodLikeDislikeController {
         this.foodLikeDislikeService = foodLikeDislikeService;
     }
 
+    @GetMapping("/{foodNo}")
+    public long getLikeDislikeCount(@PathVariable Long foodNo) {
+        return foodLikeDislikeService.getLikeDislikeCountByFoodNo(foodNo);
+    }
+
     @PostMapping("/{foodNo}")
     public void addLikeDislike(@PathVariable Long foodNo, @RequestBody FoodLikeDislike likeDislike) {
         likeDislike.setFoodNo(foodNo);
-        foodLikeDislikeService.addLikeDislike(likeDislike);
-    }
 
-    @GetMapping("/{foodNo}")
-    public int getLikeDislikeCount(@PathVariable Long foodNo) {
-        return foodLikeDislikeService.getLikeDislikeCountByFoodNo(foodNo);
+        if(foodLikeDislikeService.existsByFoodNoMemNo(likeDislike)) {
+            foodLikeDislikeService.deleteLikeDislike(likeDislike);
+
+            foodLikeDislikeService.addLikeDislike(likeDislike);
+            return;
+        }
+
+        foodLikeDislikeService.addLikeDislike(likeDislike);
     }
 }

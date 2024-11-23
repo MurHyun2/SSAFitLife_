@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>식단 짜기</h1>
+    <h1>보충제</h1>
   </div>
 </template>
 

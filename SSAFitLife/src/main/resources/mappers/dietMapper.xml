@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafitlife.food.model.dao.DietDao">
+    <resultMap id="DietWithFoodResultMap" type="Diet">
+        <id property="dietNo" column="diet_no"/>
+        <result property="memNo" column="mem_no"/>
+        <result property="foodNo" column="food_no"/>
+        <result property="dietType" column="diet_type"/>
+        <result property="foodQuantity" column="food_quantity"/>
+        <result property="dietDate" column="diet_date"/>
+
+        <association property="food" javaType="Food">
+            <id property="foodNo" column="food_no"/>
+            <result property="foodName" column="food_name"/>
+            <result property="foodAmt" column="food_amt"/>
+            <result property="foodCarb" column="food_carb"/>
+            <result property="foodProtein" column="food_protein"/>
+            <result property="foodFat" column="food_fat"/>
+            <result property="foodCalorie" column="food_calorie"/>
+            <result property="memNo" column="mem_no"/>
+            <result property="isShared" column="is_shared"/>
+        </association>
+    </resultMap>
+
+    <select id="selectDietByDate" resultMap="DietWithFoodResultMap">
+        SELECT
+        d.*,
+        f.*
+        FROM diet d
+        LEFT JOIN food f ON d.food_no = f.food_no
+        WHERE d.mem_no = #{memNo}
+        AND DATE(d.diet_date) = #{dietDate}
+    </select>
+
+</mapper>

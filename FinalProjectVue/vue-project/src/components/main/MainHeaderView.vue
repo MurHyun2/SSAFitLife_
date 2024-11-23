@@ -6,7 +6,8 @@
           class="link"
           :class="{select: currentView === view.path}"
           :to="view.path"
-      >{{ view.label }}
+      >
+        {{ view.label }}
       </RouterLink>
     </div>
   </div>

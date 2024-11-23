@@ -340,11 +340,11 @@ const handleSignup = async () => {
       return;
     }
 
-    if(signup.value.mm < 10) {
+    if (signup.value.mm < 10) {
       signup.value.mm = '0' + signup.value.mm;
     }
 
-    if(signup.value.dd < 10) {
+    if (signup.value.dd < 10) {
       signup.value.dd = '0' + signup.value.dd;
     }
 

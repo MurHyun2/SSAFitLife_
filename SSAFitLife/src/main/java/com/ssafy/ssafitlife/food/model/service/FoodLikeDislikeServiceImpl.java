@@ -14,13 +14,13 @@ public class FoodLikeDislikeServiceImpl implements FoodLikeDislikeService {
     }
 
     @Override
-    public int getLikeDislikeCountByFoodNo(Long foodNo) {
+    public long getLikeDislikeCountByFoodNo(Long foodNo) {
         return foodLikeDislikeDao.selectByFoodNo(foodNo);
     }
 
     @Override
-    public boolean existsByFoodNoMemNo(Long foodNo, Integer memNo) {
-        return foodLikeDislikeDao.existsByFoodNoMemNo(foodNo, memNo);
+    public boolean existsByFoodNoMemNo(FoodLikeDislike foodLikeDislike) {
+        return foodLikeDislikeDao.existsByFoodNoMemNo(foodLikeDislike);
     }
 
     @Override
@@ -31,5 +31,10 @@ public class FoodLikeDislikeServiceImpl implements FoodLikeDislikeService {
     @Override
     public void updateLikeDislike(FoodLikeDislike foodLikeDislike) {
         foodLikeDislikeDao.updateLikeDislike(foodLikeDislike);
+    }
+
+    @Override
+    public void deleteLikeDislike(FoodLikeDislike foodLikeDislike) {
+        foodLikeDislikeDao.deleteLikeDislike(foodLikeDislike);
     }
 }

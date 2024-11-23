@@ -1,17 +1,17 @@
 <template>
   <div class="main-container">
     <div class="main-left">
-      <MainLeftView />
+      <MainLeftView/>
     </div>
 
     <div class="main-right">
 
       <div class="main-header">
-        <MainHeaderView />
+        <MainHeaderView/>
       </div>
 
       <div class="main-body">
-        <RouterView></RouterView>
+        <RouterView/>
       </div>
 
     </div>

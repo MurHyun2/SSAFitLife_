@@ -37,7 +37,7 @@ public class ReissueServiceImpl implements ReissueService {
             }
         }
 
-        if (refresh == null) {
+          if (refresh == null) {
             return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
         }
 

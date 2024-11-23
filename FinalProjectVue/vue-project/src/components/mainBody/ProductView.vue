@@ -1,13 +1,10 @@
 <template>
-    <div>
-        제품추천 뷰
-    </div>
   <RouterView/>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 
 const route = useRoute()
 const currentMenu = ref('');

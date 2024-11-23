@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // @Controller + @ResponseBody
-@RequestMapping("/api-post")
+@RequestMapping("/post")
 public class PostController {
 	// 서비스 의존성 주입
 	private final PostService postService;
