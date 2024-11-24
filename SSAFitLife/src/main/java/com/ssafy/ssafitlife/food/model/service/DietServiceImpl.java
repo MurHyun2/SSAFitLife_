@@ -3,7 +3,9 @@ package com.ssafy.ssafitlife.food.model.service;
 import com.ssafy.ssafitlife.food.model.dao.DietDao;
 import com.ssafy.ssafitlife.food.model.dto.Diet;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -18,6 +20,11 @@ public class DietServiceImpl implements DietService {
     @Override
     public List<Diet> getDietByDate(Diet diet) {
         return dietDao.selectDietByDate(diet);
+    }
+
+    @Override
+    public Boolean existsDietByNo(Long dietNo) {
+        return dietDao.existsDietByNo(dietNo);
     }
 
     @Override

@@ -54,6 +54,7 @@ const menus = [
     ]
   },
 ]
+
 </script>
 
 <style scoped>

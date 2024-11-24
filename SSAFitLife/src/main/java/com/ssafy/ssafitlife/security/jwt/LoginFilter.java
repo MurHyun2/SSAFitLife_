@@ -73,14 +73,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         int memNo = user.getMemNo();
 
-        String accessToken = jwtUtil.createJwt("access", username, role, memNo, 600000L); // 10분
+        String accessToken = jwtUtil.createJwt("access", username, role, memNo, 6000000L); // 10분
         String refreshToken = jwtUtil.createJwt("refresh", username, role, memNo, 86400000L); // 1일
 
         saveRefreshToken(username, refreshToken);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.addCookie(createCookie("refresh", refreshToken));
-        response.setHeader("Set-Cookie", "refresh=" + refreshToken + "; Path=/; HttpOnly; Secure; SameSite=None");
+//        response.setHeader("Set-Cookie", "refresh=" + refreshToken + "; Path=/; HttpOnly; Max-Age=86400; SameSite=Lax");
         response.setStatus(HttpStatus.OK.value());
     }
 

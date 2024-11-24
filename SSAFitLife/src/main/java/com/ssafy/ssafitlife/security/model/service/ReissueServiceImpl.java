@@ -68,8 +68,6 @@ public class ReissueServiceImpl implements ReissueService {
         String role = jwtUtil.getRole(refresh);
         Integer memNo = jwtUtil.getMemNo(refresh);
 
-        System.out.println("memNo = " + memNo);
-
         // make new JWT
         String newAccess = jwtUtil.createJwt("access", username, role, memNo, 600000L);
 //        String newRefresh = jwtUtil.createJwt("refresh", username, role, memNo, 86400000L);
