@@ -56,52 +56,80 @@
             </div>
             <div class="input-group">
               <h3 class="join_title">키(cm)</h3>
-              <input v-model="user.height" type="number" step="0.1" placeholder="키(cm)" required><br>
+              <input
+                  id="height"
+                  type="number"
+                  v-model="user.height"
+                  @input="validateHeight"
+                  @keydown="preventNonNumericInput"
+                  step="0.1"
+                  placeholder="키"
+              />
+              <p v-if="heightError" class="error-message">{{ heightError }}</p>
             </div>
             <div class="input-group">
               <h3 class="join_title">성별</h3>
-              <select v-model="user.gender" required>
-                <option value="" selected disabled>성별</option>
-                <option value="0">남성</option>
-                <option value="1">여성</option>
-              </select><br>
+              <div class="gender-buttons">
+                <label class="gender-option">
+                  <input
+                      type="radio"
+                      v-model="user.gender"
+                      value="0"
+                      name="gender"
+                  >
+                  <span class="gender-label">남성</span>
+                </label>
+                <label class="gender-option">
+                  <input
+                      type="radio"
+                      v-model="user.gender"
+                      value="1"
+                      name="gender"
+                  >
+                  <span class="gender-label">여성</span>
+                </label>
+              </div>
             </div>
             <div class="input-group">
               <h3 class="join_title">생년월일</h3>
-              <div class="bir_wrap">
-                <div class="bir_yy">
-                  <span class="ps_box">
-                    <select id="yyyy" class="sel" v-model="signup.yyyy">
-                      <option value="" disabled>년</option>
-                      <option v-for="(item, index) in yyyyList" :key="index" :value="item.value">
-                        {{ item.text }}
-                      </option>
-                    </select>
-                  </span>
+              <div class="birthday-container">
+                <div class="birthday-input">
+                  <input
+                      type="number"
+                      v-model="signup.yyyy"
+                      class="birthday-select"
+                      placeholder="년도"
+                      min="1924"
+                      :max="new Date().getFullYear()"
+                      @input="validateYear"
+                  />
                 </div>
-                <div class="bir_mm">
-                  <span class="ps_box">
-                    <select id="mm" class="sel" v-model="signup.mm">
-                      <option value="" disabled>월</option>
-                      <option v-for="(item, index) in mmlist" :key="index" :value="item.value">
-                        {{ item.text }}
-                      </option>
-                    </select>
-                  </span>
+                <div class="birthday-input">
+                  <input
+                      type="number"
+                      v-model="signup.mm"
+                      class="birthday-select"
+                      placeholder="월"
+                      min="1"
+                      max="12"
+                      @input="validateMonth"
+                  />
                 </div>
-                <div class="bir_dd">
-                  <span class="ps_box">
-                    <input v-model="signup.dd"
-                           @input="validateDay"
-                           placeholder="일"
-                           type="text"
-                           class="int"
-                           maxlength="2"
-                           oninput="javascript: this.value = this.value.replace(/[^0-9]/g, '');"/>
-                  </span>
+                <div class="birthday-input">
+                  <input
+                      type="number"
+                      v-model="signup.dd"
+                      class="birthday-select"
+                      placeholder="일"
+                      min="1"
+                      :max="getLastDay"
+                      @input="validateDay"
+                  />
                 </div>
               </div>
-              <span class="error_next_box" v-if="checkFlag && (!signup.yyyy || !signup.mm || !signup.dd)" >생년월일을 입력하세요</span>
+              <span v-if="checkFlag && (!signup.yyyy || !signup.mm || !signup.dd)" class="birthday-error">
+                생년월일을 모두 입력해주세요
+              </span>
             </div>
             <div class="input-group">
               <h3 class="join_title">전화번호</h3>
@@ -126,12 +154,13 @@
 
 <script setup>
 // Vue Composition API 사용
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, watch, onUnmounted, computed} from 'vue';
 import {useRouter} from 'vue-router';
 import {useAuth} from '@/composables/useAuth';
 import axiosInstance from "@/plugins/axios.js";
 
 const { isLoggedIn, handleLogin, handleLogout, checkToken } = useAuth();
+// const isLoggedOut = ref(!localStorage.getItem('accessToken'));
 
 // 토큰 만료 여부와 로그인 상태 확인
 onMounted(() => {
@@ -253,7 +282,30 @@ const checkNickname = async () => {
 };
 
 // 비밀번호 확인 검사
+const validatePassword = () => {
+  const password = user.value.password;
+
+  // 비밀번호 조건 검사
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const isLongEnough = password.length >= 8;
+
+  if (!isLongEnough || !hasUpperCase || !hasNumber || !hasSpecialChar) {
+    passwordError.value = '대문자, 숫자, 특수문자를 조합하여 최소 8자리 이상의 길이로 입력하세요';
+    isPasswordDiff.value = true;
+    return false;
+  }
+
+  return true;
+};
+
+// 기존의 checkPasswordMatch 함수를 수정
 const checkPasswordMatch = () => {
+  if (!validatePassword()) {
+    return;
+  }
+
   if (user.value.password !== confirmPassword.value) {
     passwordError.value = '비밀번호가 일치하지 않습니다.';
     isPasswordDiff.value = true;
@@ -262,6 +314,62 @@ const checkPasswordMatch = () => {
     isPasswordDiff.value = false;
   }
 };
+
+// 에러 메시지 상태
+const heightError = ref('');
+
+// 키 유효성 검사 함수
+const validateHeight = () => {
+  const height = parseFloat(user.value.height);
+
+  if (isNaN(height) || height < 100.0 || height > 250.0) {
+    heightError.value = '키는 100~250 사이여야 합니다.';
+    if (height > 250.0) {
+      user.value.height = 250.0; // 최대값으로 설정
+    }
+  } else {
+    heightError.value = ''; // 에러 메시지 초기화
+  }
+};
+
+// 키 유효성 검사 함수
+const preventNonNumericInput = (event) => {
+  const keyValue = event.key; // 현재 입력된 키
+  const currentValue = event.target.value;
+
+  // 숫자 및 허용 키 정의
+  const allowedKeys = [
+    'Backspace',  // 지우기
+    'Tab',        // 탭
+    'ArrowLeft',  // 왼쪽 화살표
+    'ArrowRight', // 오른쪽 화살표
+    'Delete'      // 삭제
+  ];
+
+  // 소수점 처리
+  if (keyValue === '.') {
+    if (currentValue.includes('.') || currentValue === '') {
+      event.preventDefault(); // 이미 소수점이 있거나 첫 글자인 경우 방지
+    }
+    return;
+  }
+
+  // 소수점 이후 자릿수 제한
+  if (currentValue.includes('.') && !allowedKeys.includes(keyValue)) {
+    const decimalPlaces = currentValue.split('.')[1];
+    if (decimalPlaces && decimalPlaces.length >= 1 && /^[0-9]$/.test(keyValue)) {
+      event.preventDefault(); // 소수점 첫째 자리까지만 숫자 입력 허용
+      return;
+    }
+  }
+
+  // 숫자 또는 허용된 키인지 확인
+  if (!/^[0-9]$/.test(keyValue) && !allowedKeys.includes(keyValue)) {
+    event.preventDefault(); // 숫자와 허용된 키 외에는 방지
+  }
+};
+
+
 
 // 전화번호 포맷팅 함수
 const formatPhoneNumber = (event) => {
@@ -284,61 +392,89 @@ const formatPhoneNumber = (event) => {
   user.value.phoneNumber = event.target.value;
   };
 
-//생일 처리
-  const signup = ref({
-    yyyy: '',
-    mm: '',
-    dd: '',
-  });
+// 생일 관련 상태 관리
+const signup = ref({
+  yyyy: '',
+  mm: '',
+  dd: ''
+});
 
-  const yyyyList = ref([]);
-  const mmlist = ref([]);
-  const checkFlag = ref(false); // 생년월일 체크 플래그
+const yyyyList = ref([]);
+const mmlist = ref([]);
+const ddlist = ref([]); // ddlist도 ref로 선언해야 함
+const checkFlag = ref(false);
 
-  // 생년월일 관련 데이터 초기화
-  onMounted(() => {
-    const nowYear = new Date().getFullYear();
 
-    for (let i = 0; i < 100; i++) {
-      let date = nowYear - i;
-      yyyyList.value.push({ value: date, text: date });
-    }
 
-    for (let i = 1; i <= 12; i++) {
-      mmlist.value.push({
-        value: i,
-        text: i,
-      });
-    }
-  });
+const validateYear = () => {
+  const currentYear = new Date().getFullYear();
+  const year = parseInt(signup.value.yyyy);
 
-  const validateDay = () => {
-    // signup.dd가 undefined일 경우 빈 문자열로 설정
-    let day = signup.value.dd || '';
-    // 숫자만 남기기
-    day = day.replace(/[^0-9]/g, '');
-    // 숫자 값이 31을 초과하지 않도록 처리
-    if (parseInt(day) > 31) {
-      signup.value.dd = '31'; // 최대값을 31로 제한
-    }
-  };
+  if (isNaN(year) || year > currentYear) {
+    signup.value.yyyy = Math.min(year, currentYear);
+  }
+}
+
+const validateMonth = () => {
+  const month = parseInt(signup.value.mm);
+
+  if (isNaN(month) || month < 1 || month > 12) {
+    signup.value.mm = Math.min(Math.max(1, month), 12);
+  }
+}
+
+const validateDay = () => {
+  const lastDay = new Date(signup.value.yyyy, signup.value.mm, 0).getDate();
+  const day = parseInt(signup.value.dd);
+
+  if (isNaN(day) || day < 1 || day > lastDay) {
+    signup.value.dd = Math.min(Math.max(1, day), lastDay);
+  }
+}
+
+// 마지막 날짜 계산을 위한 computed 속성
+const getLastDay = computed(() => {
+  if (!signup.value.yyyy || !signup.value.mm) return 31;
+  return new Date(signup.value.yyyy, signup.value.mm, 0).getDate();
+});
+
+// 년도와 월이 변경될 때 일 수 재계산
+watch(
+    [
+      () => signup.value.yyyy,
+      () => signup.value.mm
+    ],
+    ([newYear, newMonth]) => {
+      if (newMonth && newYear) {
+        const lastDay = new Date(newYear, newMonth, 0).getDate();
+        ddlist.value = Array.from({length: lastDay}, (_, i) => i + 1);
+
+        // 현재 선택된 일자가 새로운 월의 마지막 날짜보다 큰 경우 조정
+        if (signup.value.dd > lastDay) {
+          signup.value.dd = lastDay;
+        }
+      } else {
+        ddlist.value = [];
+      }
+    },
+    { immediate: true }
+);
+
+// 생년월일 포맷팅
+const formatBirthday = () => {
+  if (!signup.value.yyyy || !signup.value.mm || !signup.value.dd) {
+    return;
+  }
+
+  const month = signup.value.mm.toString().padStart(2, '0');
+  const day = signup.value.dd.toString().padStart(2, '0');
+
+  return `${signup.value.yyyy}-${month}-${day}`;
+};
 
 const handleSignup = async () => {
   try {
-    if (!signup.yyyy || !signup.mm || !signup.dd) {
-      checkFlag.value = true; // 생년월일이 제대로 입력되지 않으면 오류 표시
-      return;
-    }
-
-    if (signup.value.mm < 10) {
-      signup.value.mm = '0' + signup.value.mm;
-    }
-
-    if (signup.value.dd < 10) {
-      signup.value.dd = '0' + signup.value.dd;
-    }
-
-    user.value.birthday = signup.value.yyyy + "-" + signup.value.mm + "-" + signup.value.dd;
+    user.value.birthday = formatBirthday();
 
     const response = await axiosInstance.post('/user/join', user.value);
 
@@ -391,30 +527,6 @@ const handleSignup = async () => {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
   padding: 20px;
   transition: transform 0.3s ease;
-}
-
-/* 닫기 버튼 스타일 */
-
-/* Transition 스타일 */
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s ease; /* 진입 및 퇴장 모두 애니메이션 적용 */
-}
-
-.slide-enter {
-  transform: translateX(100%); /* 오른쪽 화면 밖에서 시작 */
-}
-
-.slide-enter-to {
-  transform: translateX(0); /* 화면 안으로 부드럽게 이동 */
-}
-
-.slide-leave {
-  transform: translateX(0); /* 화면 안에서 시작 */
-}
-
-.slide-leave-to {
-  transform: translateX(100%); /* 오른쪽 화면 밖으로 나감 */
 }
 
 .login,.signup,.mypage{
@@ -544,60 +656,115 @@ const handleSignup = async () => {
   .plus {
     font-size: 20px;
   }
-  
-  /* Transition Effects */
-  .slide-enter-active,
-  .slide-leave-active {
-    transition: transform 0.3s ease;
-  }
-
-  .slide-enter {
-    transform: translateX(100%);
-  }
-
-  .slide-enter-to {
-    transform: translateX(0);
-  }
-
-  .slide-leave {
-    transform: translateX(0);
-  }
-
-  .slide-leave-to {
-    transform: translateX(100%);
-  }
 
 /* 생일 입력 관련 스타일 */
-.bir_wrap {
+
+.gender-buttons {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
+  margin: 10px 0;
 }
 
-.bir_yy, .bir_mm, .bir_dd {
+.gender-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.gender-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.gender-label {
+  padding: 10px 30px;
+  border: 2px solid #97d4e9;
+  border-radius: 25px;
+  color: #97d4e9;
+  transition: all 0.3s ease;
+}
+
+.gender-option input[type="radio"]:checked + .gender-label {
+  background-color: #97d4e9;
+  color: white;
+}
+
+.gender-option:hover .gender-label {
+  background-color: rgba(151, 212, 233, 0.1);
+}
+
+.birthday-container {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.birthday-input {
   flex: 1;
 }
 
-.ps_box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.birthday-select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #333;
+  background-color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1em;
 }
 
-.sel {
-  width: 80%;
-  padding: 8px;
-  font-size: 16px;
+.birthday-select:focus {
+  border-color: #97d4e9;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(151, 212, 233, 0.2);
 }
 
-.int {
-  width: 80%;
-  padding: 8px;
-  font-size: 16px;
+.birthday-select:hover {
+  border-color: #97d4e9;
 }
 
-.error_next_box {
-  color: red;
-  font-size: 14px;
-  margin-top: 10px;
+.birthday-error {
+  display: block;
+  color: #ff4444;
+  font-size: 13px;
+  margin-top: 5px;
 }
+
+.join_title {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Transition Effects */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter {
+  transform: translateX(100%);
+}
+
+.slide-enter-to {
+  transform: translateX(0);
+}
+
+.slide-leave {
+  transform: translateX(0);
+}
+
+.slide-leave-to {
+  transform: translateX(100%);
+}
+
 </style>

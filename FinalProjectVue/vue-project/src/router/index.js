@@ -13,6 +13,7 @@ import ActivityManage from "@/components/mainBody/weight/ActivityManage.vue";
 import WeightManage from "@/components/mainBody/weight/WeightManage.vue";
 import Sup from "@/components/mainBody/product/Sup.vue";
 import ChickenBreast from "@/components/mainBody/product/ChickenBreast.vue";
+import DietPlan from "@/components/mainBody/diet/DietPlan.vue";
 
 const routes = [
     {
@@ -38,7 +39,7 @@ const routes = [
                 path: 'diet-manage',
                 component: DietView,
                 children: [
-                    {path: 'diet-plan', component: DietView},
+                    {path: 'diet-plan', component: DietPlan},
                     {path: 'millprep-assist', component: DietView},
                     {path: 'sup-use', component: DietView},
                 ]

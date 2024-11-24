@@ -1,30 +1,35 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080', // Spring API 기본 URL
-    withCredentials: true, // 쿠키 전송 허용
+    baseURL: 'http://localhost:8080',
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
-// axiosInstance.interceptors.request.use(
-//     (config) => {
-//         // 예시: Authorization 헤더를 설정 (토큰이 있을 경우)
-//         const token = localStorage.getItem('accessToken'); // 또는 쿠키에서 가져오기
-//         if (token) {
-//             config.headers['Authorization'] = token;
-//         }
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
-//
-// axiosInstance.interceptors.response.use(
-//     (response) => response,
-//     (error) => {
-//         // 응답 오류 처리
-//         return Promise.reject(error);
-//     }
-// );
+// 요청 인터셉터
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        config.headers['Authorization'] = `${token}`;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
+
+// 응답 인터셉터 (401 에러 처리)
+axiosInstance.interceptors.response.use((response) => {
+    return response;
+}, async (error) => {
+    if (error.response && error.response.status === 401) {
+        console.error('인증 오류 발생. 다시 로그인하세요.');
+        // 로그아웃 처리 또는 리프레시 토큰 로직 추가 가능
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login'; // 로그인 페이지로 이동
+    }
+    return Promise.reject(error);
+});
 
 export default axiosInstance;
