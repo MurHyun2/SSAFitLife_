@@ -32,6 +32,36 @@
         LEFT JOIN food f ON d.food_no = f.food_no
         WHERE d.mem_no = #{memNo}
         AND DATE(d.diet_date) = #{dietDate}
+        ORDER BY d.diet_type
     </select>
+
+    <select id="existsDietByNo" resultType="boolean" parameterType="long">
+        SELECT COUNT(*) > 0
+        FROM diet
+        WHERE diet_no = #{dietNo}
+    </select>
+
+    <insert id="insertDiet" parameterType="Diet">
+        INSERT INTO diet(
+            mem_no,
+            food_no,
+            diet_type,
+            food_quantity,
+            diet_date
+        )
+        VALUES (
+            #{memNo},
+            #{foodNo},
+            #{dietType},
+            #{foodQuantity},
+            #{dietDate}
+        )
+    </insert>
+
+    <delete id="deleteDiet" parameterType="Diet">
+        DELETE FROM diet
+        WHERE mem_no = #{memNo}
+        AND DATE(diet_date) = #{dietDate}
+    </delete>
 
 </mapper>

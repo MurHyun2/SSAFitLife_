@@ -2,6 +2,10 @@ package com.ssafy.ssafitlife.food.controller;
 
 import com.ssafy.ssafitlife.food.model.dto.Food;
 import com.ssafy.ssafitlife.food.model.service.FoodService;
+import com.ssafy.ssafitlife.security.model.dto.CustomUserDetails;
+import com.ssafy.ssafitlife.user.model.dto.User;
+import com.ssafy.ssafitlife.user.model.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +16,11 @@ import java.util.List;
 public class FoodController {
 
     private final FoodService foodService;
+    private final UserService userService;
 
-    public FoodController(FoodService foodService) {
+    public FoodController(FoodService foodService, UserService userService) {
         this.foodService = foodService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -28,7 +34,8 @@ public class FoodController {
     }
 
     @PostMapping
-    public void addFood(@RequestBody Food food) {
+    public void addFood(@RequestBody Food food, @AuthenticationPrincipal CustomUserDetails user) {
+        food.setMemNo(user.getMemNo());
         foodService.addFood(food);
     }
 

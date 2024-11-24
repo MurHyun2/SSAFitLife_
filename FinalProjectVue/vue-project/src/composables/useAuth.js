@@ -13,6 +13,7 @@ export function useAuth() {
 
     // 토큰 만료 여부 확인 함수
     function isTokenExpired(token) {
+        console.log("토큰 만료 여부 확인 함수")
         if (!token) {
             return true;
         }
@@ -23,6 +24,7 @@ export function useAuth() {
 
     // 새로운 액세스 토큰을 재발급 받는 함수
     const handleReissueToken = async () => {
+        console.log("새로운 액세스 토큰을 재발급 받는 함수")
         if (isReissueInProgress) return; // 이미 요청 중인 경우 중복 요청 방지
         isReissueInProgress = true;
 
@@ -38,6 +40,7 @@ export function useAuth() {
 
     // 토큰 만료 여부와 로그인 상태 확인
     const checkToken = async () => {
+        console.log("토큰 만료 여부와 로그인 상태 확인")
         const token = localStorage.getItem('accessToken');
         if (!token) {
             isLoggedIn.value = false;
@@ -65,6 +68,7 @@ export function useAuth() {
 
     // 로그인 처리
     const handleLogin = async (username, password) => {
+        console.log("로그인")
         try {
             const response = await axiosInstance.post('/login', { username, password });
             // 'Authorization' 헤더에서 'Bearer' 토큰 추출
@@ -88,17 +92,16 @@ export function useAuth() {
     // 로그아웃 처리
     const handleLogout = async () => {
         // document.cookie = 'refresh=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict';
-        try {
-            const response = await axiosInstance.post('/logout', {}, {});
-            // 로그아웃 후 상태 초기화
+        // try {
             isLoggedIn.value = false;
             axiosInstance.defaults.headers.common['Authorization'] = null; // Authorization 헤더 초기화
             localStorage.removeItem('accessToken');
+            // const response = await axiosInstance.post('/logout', {}, {});
             window.location.href = '/'; // 메인 페이지로 이동
-        } catch (err) {
-            console.log('로그아웃 실패:', err);
-            alert('로그아웃 실패');
-        }
+        // } catch (err) {
+        //     console.log('로그아웃 실패:', err);
+        //     alert('로그아웃 실패');
+        // }
     };
 
     return {

@@ -35,8 +35,8 @@ const menus = {
   ],
   'diet-manage': [
     {label: '식단 짜기', path: 'diet-plan'},
-    {label: '밀프렙 도우미', path: 'millprep-assist'},
-    {label: '보충제 활용', path: 'sup-use'},
+    // {label: '밀프렙 도우미', path: 'millprep-assist'},
+    // {label: '보충제 활용', path: 'sup-use'},
   ],
   'product-recommend': [
     {label: '보충제 추천', path: 'sup'},

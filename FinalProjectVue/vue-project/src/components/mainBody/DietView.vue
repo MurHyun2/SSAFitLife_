@@ -1,7 +1,4 @@
 <template>
-  <div>
-    식단관리 뷰
-  </div>
   <RouterView/>
 </template>
 
