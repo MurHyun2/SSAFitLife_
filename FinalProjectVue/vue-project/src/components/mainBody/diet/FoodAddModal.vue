@@ -10,10 +10,10 @@
           식품 목록
         </button>
         <button
-            :class="['tab-button', { active: activeTab === '식품 등록' }]"
-            @click="activeTab = '식품 등록'"
+            :class="['tab-button', { active: activeTab === '식품 등록/수정' }]"
+            @click="activeTab = '식품 등록/수정'"
         >
-          식품 등록
+          식품 등록/수정
         </button>
         <button
             :class="['tab-button', { active: activeTab === '등록한 식품' }]"
@@ -100,8 +100,8 @@
         </div>
       </div>
 
-      <!-- 식품 등록 폼 -->
-      <div v-if="activeTab === '식품 등록'" class="food-register-form">
+      <!-- 식품 등록/수정 폼 -->
+      <div v-if="activeTab === '식품 등록/수정'" class="food-register-form">
         <div class="form-group">
           <label>식품명</label>
           <input type="text" v-model="foodData.foodName" placeholder="식품명을 입력하세요"/>
@@ -130,7 +130,9 @@
         </div>
         <div class="modal-buttons">
           <button @click="closeModal" class="cancel-btn">취소</button>
-          <button @click="registerFood" class="confirm-btn" :disabled="!isValidFood">등록하기</button>
+          <button @click="registerFood" class="confirm-btn" :disabled="!isValidFood">
+            {{ isEditMode ? '수정하기' : '등록하기' }}
+          </button>
         </div>
       </div>
 
@@ -148,7 +150,7 @@
         </div>
 
         <!-- 검색 결과 목록 -->
-        <div class="search-results" @scroll="handleScroll">
+        <div class="search-results">
           <div
               v-for="food in registeredSearchResults"
               :key="food.foodNo"
@@ -183,6 +185,9 @@
           </div>
           <div v-if="loading" class="loading">로딩 중...</div>
         </div>
+          <div class="modal-buttons">
+            <button @click="closeModal" class="cancel-btn">취소</button>
+          </div>
       </div>
     </div>
   </div>
@@ -204,6 +209,8 @@ const selectedMealType = ref(null);
 const page = ref(1);
 const limit = 10;
 const loading = ref(false);
+const isEditMode = ref(false);
+const editingFoodNo = ref(null);
 
 const mealTypes = [
   {id: 0, name: '아침'},
@@ -215,7 +222,9 @@ const mealTypes = [
 // 모달 열기 시 자동으로 데이터 로드
 watch(isOpen, async (newValue) => {
   if (newValue) {
+    page.value = 1; // 페이지 초기화 추가
     await loadInitialData();
+    await loadRegisteredFoods();
   }
 });
 
@@ -307,6 +316,7 @@ const closeModal = () => {
   selectedMealType.value = null;
   searchKeyword.value = '';
   searchResults.value = [];
+  page.value = 1;
 
   foodData.value = {
     foodName: '',
@@ -343,12 +353,18 @@ const isValidFood = computed(() => {
       foodData.value.foodCalorie >= 0
 })
 
+// registerFood 함수 수정
 const registerFood = async () => {
   try {
-    await axiosInstance.post('/food', foodData.value)
+    if (isEditMode.value) {
+      await axiosInstance.put(`/food/${editingFoodNo.value}`, foodData.value);
+      alert('식품이 수정되었습니다.');
+    } else {
+      await axiosInstance.post('/food', foodData.value);
+      alert('식품이 등록되었습니다.');
+    }
 
-    alert('식품이 등록되었습니다.')
-
+    // 초기화
     foodData.value = {
       foodName: '',
       foodAmt: 100,
@@ -357,15 +373,18 @@ const registerFood = async () => {
       foodProtein: 0,
       foodFat: 0,
       isShared: 1
-    }
+    };
+    isEditMode.value = false;
+    editingFoodNo.value = null;
 
-    await loadInitialData()
-    activeTab.value = '식품 목록'
+    await loadInitialData();
+    await loadRegisteredFoods();
+    activeTab.value = '등록한 식품';
   } catch (error) {
-    console.error('식품 등록 실패:', error)
-    alert('식품 등록에 실패했습니다.')
+    console.error('식품 처리 실패:', error);
+    alert(isEditMode.value ? '식품 수정에 실패했습니다.' : '식품 등록에 실패했습니다.');
   }
-}
+};
 
 // 등록한 식품 관련 상태 추가
 const registeredSearchKeyword = ref('');
@@ -378,21 +397,26 @@ const searchRegisteredFood = () => {
     const filtered = registeredFoods.value.filter(food =>
         food.foodName.toLowerCase().includes(registeredSearchKeyword.value.toLowerCase())
     );
-    registeredSearchResults.value = filtered.slice(0, limit);
+    registeredSearchResults.value = filtered;
   } else {
-    registeredSearchResults.value = registeredFoods.value.slice(0, limit);
+    registeredSearchResults.value = registeredFoods.value;
   }
-};
+}
 
 // 식품 수정 함수
-const editFood = async (food) => {
-  try {
-    // 수정 로직 구현
-    await axiosInstance.put(`/food/${food.foodNo}`, food);
-    await loadRegisteredFoods();
-  } catch (error) {
-    console.error('식품 수정 실패:', error);
-  }
+const editFood = (food) => {
+  isEditMode.value = true;
+  editingFoodNo.value = food.foodNo;
+  foodData.value = {
+    foodName: food.foodName,
+    foodAmt: food.foodAmt,
+    foodCalorie: food.foodCalorie,
+    foodCarb: food.foodCarb,
+    foodProtein: food.foodProtein,
+    foodFat: food.foodFat,
+    isShared: food.isShared
+  };
+  activeTab.value = '식품 등록/수정';
 };
 
 // 식품 삭제 함수
@@ -401,6 +425,7 @@ const deleteFood = async (food) => {
     try {
       await axiosInstance.delete(`/food/${food.foodNo}`);
       await loadRegisteredFoods();
+      alert('삭제가 완료되었습니다.')
     } catch (error) {
       console.error('식품 삭제 실패:', error);
     }
@@ -412,11 +437,11 @@ const loadRegisteredFoods = async () => {
   try {
     const response = await axiosInstance.get('/food/registered');
     registeredFoods.value = response.data;
-    registeredSearchResults.value = registeredFoods.value.slice(0, limit);
+    registeredSearchResults.value = registeredFoods.value;
   } catch (error) {
     console.error('등록한 식품 로드 실패:', error);
   }
-};
+}
 
 </script>
 
@@ -658,7 +683,7 @@ const loadRegisteredFoods = async () => {
 }
 
 .food-register-form {
-  padding: 20px;
+  padding: 30px;
 }
 
 .form-group {
