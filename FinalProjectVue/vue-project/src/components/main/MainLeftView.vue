@@ -47,16 +47,16 @@ const menus = [
     alt: 'DietMange',
   },
   {
-    label: '제품추천',
-    to: '/product-recommend/sup',
-    src: '/productRecommendButton.png',
-    alt: 'ProductRecommend',
-  },
-  {
     label: '게시판',
     to: '/board/posts',
     src: '/PostButton.png',
     alt: 'Post',
+  },
+  {
+    label: '제품추천',
+    to: '/product-recommend/sup',
+    src: '/productRecommendButton.png',
+    alt: 'ProductRecommend',
   },
 ];
 </script>

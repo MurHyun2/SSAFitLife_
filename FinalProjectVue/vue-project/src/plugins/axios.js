@@ -27,7 +27,7 @@ axiosInstance.interceptors.response.use((response) => {
         console.error('인증 오류 발생. 다시 로그인하세요.');
         // 로그아웃 처리 또는 리프레시 토큰 로직 추가 가능
         localStorage.removeItem('accessToken');
-        window.location.href = '/login'; // 로그인 페이지로 이동
+        window.location.href = '/'; // 로그인 페이지로 이동
     }
     return Promise.reject(error);
 });

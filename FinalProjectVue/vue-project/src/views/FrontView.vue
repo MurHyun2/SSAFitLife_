@@ -39,18 +39,18 @@ const menus = [
     ]
   },
   {
+    label: '게시판',
+    basePath: 'board',
+    views: [
+      {label: '게시판 이동', view: 'posts'},
+    ]
+  },
+  {
     label: '제품 추천',
     basePath: 'product-recommend',
     views: [
       {label: '보충제 추천', view: 'sup'},
       {label: '닭가슴살 추천', view: 'chicken-breast'},
-    ]
-  },
-  {
-    label: '게시판',
-    basePath: 'board',
-    views: [
-      {label: '게시판 이동', view: 'posts'},
     ]
   },
 ]

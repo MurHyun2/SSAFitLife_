@@ -81,16 +81,7 @@ public class CommentController {
 	// 댓글 등록
 	@PostMapping("/comment/{memNo}/{postNo}/{commentParentNo}")
 	public ResponseEntity<String> write(@PathVariable("memNo") int memNo , @PathVariable("postNo") int postNo, @PathVariable( required = false ) Integer commentParentNo , @RequestBody Comment comment) {
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		System.out.println(commentParentNo);
-		
+
 		comment.setMemNo(memNo);
 		comment.setPostNo(postNo);
 		comment.setCommentParentNo(commentParentNo);
