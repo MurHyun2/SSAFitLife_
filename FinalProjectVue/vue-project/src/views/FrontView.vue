@@ -3,16 +3,13 @@
     <nav class="container">
       <div v-for="menu in menus" :key="menu.index" class="menu">
         <h2 v-if="menu.label === '체중 관리'" class="SSAFitLife">SSAFitLife</h2>
-
         <h1 class="title">{{ menu.label }}</h1>
-
         <div class="views">
           <div v-for="view in menu.views" class="view">
             <RouterLink :to="`/${menu.basePath}/${view.view}`" class="link">{{ view.label }}</RouterLink>
             <a class="arrow">></a>
           </div>
         </div>
-
       </div>
     </nav>
   </div>
@@ -39,18 +36,18 @@ const menus = [
     ]
   },
   {
+    label: '게시판',
+    basePath: 'board',
+    views: [
+      {label: '게시판 이동', view: 'posts'},
+    ]
+  },
+  {
     label: '제품 추천',
     basePath: 'product-recommend',
     views: [
       {label: '보충제 추천', view: 'sup'},
       {label: '닭가슴살 추천', view: 'chicken-breast'},
-    ]
-  },
-  {
-    label: '게시판',
-    basePath: 'board',
-    views: [
-      {label: '게시판 이동', view: 'posts'},
     ]
   },
 ]
@@ -78,12 +75,10 @@ const menus = [
   width: 100%;
   position: absolute;
   top: 200px;
-
 }
 
 .view {
   margin-top: 20px;
-
 }
 
 .link {
@@ -128,27 +123,10 @@ const menus = [
   transition: 0.2s;
 }
 
-.content1:hover {
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.category1 {
-  /* margin-left: 20px; */
-  background-color: #e5f2fb;
-  height: 100vh;
-  width: 100vh;
-  margin: 8px;
-  margin-left: 20px;
-  border-radius: 30px;
-  position: relative;
-}
-
 .menu {
   /* margin-left: 20px; */
   background-color: #e5f2fb;
-  height: 100vh;
+  height: 99vh;
   width: 100vh;
   margin: 8px;
   margin-left: 20px;
@@ -163,7 +141,7 @@ const menus = [
   /* flex-direction: row; */
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 99vh;
   /* width: 100vh; */
 }
 </style>

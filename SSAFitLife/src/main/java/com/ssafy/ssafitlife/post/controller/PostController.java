@@ -23,7 +23,6 @@ public class PostController {
 
 	@GetMapping("/post")
 	public ResponseEntity<Object> list() {
-		System.out.println("게시글 전체보기");
 	    try {
 	        List<Post> list = postService.getPostList();
 	        if (!list.isEmpty())

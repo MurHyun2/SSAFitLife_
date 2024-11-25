@@ -30,7 +30,7 @@ watch(() => route.path, (path) => {
 const menus = {
   'weight-manage': [
     {label: '체중관리', path: 'weight-manage'},
-    {label: '체조성 기록', path: 'body-record'},
+    // {label: '체조성 기록', path: 'body-record'},
     {label: '활동관리', path: 'activity-manage'},
   ],
   'diet-manage': [

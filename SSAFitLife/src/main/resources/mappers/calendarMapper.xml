@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafitlife.calendar.model.dao.CalendarDao">
+
+    <!-- 몸무게 정보 조회 -->
+    <select id="selectAllCalendars" resultType="Calendar" parameterType="int">
+        SELECT *
+        FROM calendar
+        WHERE mem_no = #{memNo}
+    </select>
+
+    <select id="selectCalendar" resultType="Calendar" parameterType="Calendar">
+        SELECT *
+        FROM calendar
+        WHERE mem_no = #{memNo}
+        AND Date(date) = #{date}
+    </select>
+
+    <!-- 몸무게 정보 추가 -->
+    <insert id="insertCalendar" parameterType="Calendar">
+        INSERT INTO calendar(mem_no, date, weight)
+        VALUES(#{memNo}, #{date}, #{weight})
+    </insert>
+
+    <!-- 몸무게 정보 수정 -->
+    <update id="updateCalendar" parameterType="Calendar">
+        UPDATE calendar
+        SET weight = #{weight}
+        WHERE mem_no = #{memNo}
+        AND Date(date) = #{date}
+    </update>
+
+    <delete id="deleteCalendar" parameterType="Calendar">
+        DELETE FROM calendar
+        WHERE mem_no = #{memNo}
+        AND Date(date) = #{date}
+    </delete>
+</mapper>

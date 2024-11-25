@@ -65,7 +65,11 @@ public class FoodController {
     }
 
     @DeleteMapping("/{foodNo}")
-    public ResponseEntity<String> deleteFood(@PathVariable Long foodNo) {
+    public ResponseEntity<String> deleteFood(@PathVariable Long foodNo, @AuthenticationPrincipal CustomUserDetails user) {
+        if(foodService.getFoodByNo(foodNo).getMemNo() != user.getMemNo()) {
+            return new ResponseEntity<>("회원 정보가 일치하지 않습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         try {
             foodService.removeFood(foodNo);
             return new ResponseEntity<>("음식이 삭제되었습니다.", HttpStatus.OK);
