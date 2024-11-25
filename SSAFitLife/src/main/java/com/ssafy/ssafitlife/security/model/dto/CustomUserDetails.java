@@ -9,7 +9,7 @@ import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
@@ -61,5 +61,9 @@ public class CustomUserDetails implements UserDetails {
     // CustomUserDetails에서 User 객체 반환
     public User getUser() {
         return user;
+    }
+
+    public int getMemNo() {
+        return user.getMemNo();
     }
 }

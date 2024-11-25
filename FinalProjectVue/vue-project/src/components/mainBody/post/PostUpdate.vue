@@ -1,176 +1,251 @@
 <template>
-  <div>
+  <div class="update-container">
     <h2>게시물 수정</h2>
+    <div class="content-wrapper">
       <form @submit.prevent="updatePost">
-          <div class="container">
-      <span class="title">
-          <span class="item">제목</span>
-          <span class="body">
-          <input clas="update-title" type="text" v-model="list.postTitle" :placeholder = "list.postTitle">
-          </span>
-      </span>
-      <span class="create">
-          <span class="item">등록일</span>
-          <span class="body">{{ list.postCreatedDate }}</span>
-      </span>
-    </div>
-    <div class="container">
+        <div class="info-section">
+          <div class="info-row">
+            <div class="form-group">
+              <span class="label">제목</span>
+              <input 
+                class="input-field" 
+                type="text" 
+                v-model="list.postTitle" 
+                :placeholder="list.postTitle"
+              >
+            </div>
+            <div class="info-group">
+              <span class="label">등록일</span>
+              <span class="value">{{ list.postCreatedDate }}</span>
+            </div>
+          </div>
 
-      <span class="writer">
-          <span class="item">작성자</span>
-          <span class="body">{{ list.memNo }}</span>
-      </span>
-      <span class="update">
-        <span class="item">수정일</span>
-        <span class="body">{{ list.postUpdatedDate }}</span>
-      </span>
-    </div>
+          <div class="info-row">
+            <div class="info-group">
+              <span class="label">작성자</span>
+              <span class="value">{{ list.memNo }}</span>
+            </div>
+            <div class="info-group">
+              <span class="label">수정일</span>
+              <span class="value">{{ list.postUpdatedDate }}</span>
+            </div>
+          </div>
 
-    <div class="container">
-      <span class="views">
-        <span class="item">조회수</span>
-        <span class="body">{{ list.postViews }}</span>
-      </span>
-    </div>
+          <div class="info-row">
+            <div class="info-group">
+              <span class="label">조회수</span>
+              <span class="value">{{ list.postViews }}</span>
+            </div>
+          </div>
+        </div>
 
-    <div class="container">
-      <span class="content">
-        <span class="item">내용</span>
-        <textarea class="update-content" type="text" v-model="list.postContent" :placeholder = "list.postContent"></textarea>
-      </span>
-    </div>
-    <div class="buttons">
+        <div class="form-group content-group">
+          <span class="label">내용</span>
+          <textarea 
+            class="textarea-field" 
+            v-model="list.postContent" 
+            :placeholder="list.postContent"
+          ></textarea>
+        </div>
 
-      <RouterLink class="update-button" :to="{ name: 'postDetail' , params:{postNo: list.postNo}}" @click.native.prevent="updatePost">
-        수정
-      </RouterLink>
-      <RouterLink class="detail-button" :to="{ name: 'postDetail' , params:{postNo: list.postNo}}">
-        취소
-      </RouterLink>
-      <RouterLink class="post-button" :to="{name: 'postList'}">목록</RouterLink>
-    </div>
-
-
+        <div class="button-group">
+          <button class="btn btn-submit" type="submit">수정</button>
+          <RouterLink class="btn btn-cancel" :to="{ name: 'postDetail', params: { postNo: list.postNo } }">
+            취소
+          </RouterLink>
+          <RouterLink class="btn btn-list" :to="{ name: 'posts' }">목록</RouterLink>
+        </div>
       </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import axios from 'axios';
-  import { ref, watch } from 'vue';
-  import { useRoute } from 'vue-router';
+import {ref, watch, onMounted} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import axiosInstance from "@/plugins/axios.js";
 
-  const route = useRoute()
-  const category = ref(route.params.category)
-  const currentView = ref(route.params.currentView)
-  const postNo = ref(route.params.postNo)
-  const list = ref({});
+const route = useRoute();
+const router = useRouter();
+const postNo = ref(route.params.postNo);
+const list = ref({});
 
-  const updatePost = async () => {
-    await axios.put(`http://localhost:8080/post/post/${postNo.value}`, {
+const requestPostDetail = async () => {
+  const {data} = await axiosInstance.get(`http://localhost:8080/post/post/${postNo.value}`);
+  list.value = data;
+};
+
+const updatePost = async () => {
+  try {
+    await axiosInstance.put(`http://localhost:8080/post/post/${postNo.value}`, {
       postTitle: list.value.postTitle,
       postContent: list.value.postContent,
     });
     alert('게시물이 성공적으로 수정되었습니다.');
-
-    window.location.reload();
+    router.push({name: 'postDetail', params: {postNo: postNo.value}});
+  } catch (error) {
+    console.error('게시물 수정에 실패했습니다:', error);
+  }
 };
 
-
-  const requestPostDetail = async()=>{
-  const { data } = await axios.get(`http://localhost:8080/post/post/${postNo.value}`);
-      list.value = data;
-  }
-
+onMounted(() => {
   requestPostDetail();
-  
-  watch(()=>route.params.category,(newcategory)=>{
-      category.value = newcategory
-  })
-  watch(()=>route.params.currentView,(newcurrentView)=>{
-      currentView.value = newcurrentView
-  })
+});
+
+watch(() => route.params.postNo, (newPostNo) => {
+  postNo.value = newPostNo;
+  requestPostDetail();
+}, {immediate: true});
 </script>
 
 <style scoped>
-  .buttons{
-    margin-top: 20px;
-    display: flex;
-    margin-left: auto;
-    margin-right: 30%;
-    justify-content: flex-end;
-  }
-  .update-button,.detail-button,.post-button{
-    text-decoration: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
-    color: white;
-    background-color: #97d4e9;
-    border-radius: 35px;
-    width: 64px;
-    height: 27px;
-    margin: 10px;
-    
-    /* flex-shrink: 0; */
-  }
-  .update-button{
-    color: blue;
-  }
-  .detail-button{
-    color: black;
-  }
-  .post-button{
-    color: gray;
-  }
-
-
-  .container{
-      position: relative;
-      display: flex;
-      align-items: center;
+.update-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
-.container span{
-  margin: 8px;
-  display: flex;
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 40px;
+  font-size: 24px;
 }
-.item{
+
+.content-wrapper {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.info-section {
+  margin-bottom: 30px;
+}
+
+.info-row {
   display: flex;
-  flex-shrink: 0;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: bold;
+}
+
+.info-group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.content-group {
+  align-items: flex-start;
+}
+
+.label {
+  background-color: #b1def0;
   color: white;
-  background-color: #97d4e9;
-  border-radius: 35px;
-  width: 64px;
-  height: 27px;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 80px;
+  text-align: center;
+  margin-right: 15px;
 }
-.title{
-  flex:1;
+
+.value {
+  flex: 1;
+  padding: 8px;
+  color: #495057;
 }
-.writer{
-  flex:1;
+
+.input-field {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
 }
-.create{
-  flex:1;
+
+.textarea-field {
+  flex: 1;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  min-height: 300px;
+  font-size: 16px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
 }
-.update{
-  flex:1;
+
+.input-field:focus,
+.textarea-field:focus {
+  outline: none;
+  border-color: #b1def0;
 }
-.body{
+
+.button-group {
   display: flex;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
 }
-.update-content {
-  width: 50vw;
-  height: 50vh;
+
+.btn {
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
- h2{
-  display: flex;
-  justify-content: center;
-  margin-bottom: 60px;
- }
+
+.btn-submit {
+  background-color: #b1def0;
+  color: white;
+}
+
+.btn-cancel {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.btn-list {
+  background-color: #adb5bd;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .info-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-group,
+  .info-group {
+    width: 100%;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
 </style>

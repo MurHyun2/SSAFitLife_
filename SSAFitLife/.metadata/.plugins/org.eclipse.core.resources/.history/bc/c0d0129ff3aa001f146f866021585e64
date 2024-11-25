@@ -1,0 +1,5 @@
+package com.ssafy.ssafitlife.Calendar.config;
+
+public class DBConfig {
+
+}

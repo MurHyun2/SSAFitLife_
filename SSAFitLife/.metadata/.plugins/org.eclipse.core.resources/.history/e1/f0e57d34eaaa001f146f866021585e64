@@ -1,0 +1,13 @@
+package com.ssafy.ssafitlife.Calendar.model.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.ssafy.ssafitlife.Calendar.model.dto.Calendar;
+
+@Service
+public interface CalendarService {
+	List<Calendar> getCalendarList(int memNo);
+
+}

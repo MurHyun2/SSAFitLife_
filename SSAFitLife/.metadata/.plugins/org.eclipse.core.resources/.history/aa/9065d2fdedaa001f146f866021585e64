@@ -1,0 +1,5 @@
+package com.ssafy.ssafitlife.Calendar.model.Dao;
+
+public interface CalendarDao {
+
+}

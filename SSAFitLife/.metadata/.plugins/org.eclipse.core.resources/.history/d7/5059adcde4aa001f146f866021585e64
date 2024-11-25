@@ -1,0 +1,5 @@
+package com.ssafy.ssafitlife.post.model.service;
+
+public class CalendarServiceImpl implements CalendarService {
+
+}

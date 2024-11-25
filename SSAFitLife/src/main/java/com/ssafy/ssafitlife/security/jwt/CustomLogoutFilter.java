@@ -90,13 +90,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         refreshCookie.setMaxAge(0);
         refreshCookie.setPath("/");
 
-        //액세스 토큰 쿠키도 삭제
-        Cookie accessCookie = new Cookie("access", null);
-        accessCookie.setMaxAge(0); // 액세스 토큰 쿠키 만료 처리
-        accessCookie.setPath("/");
-
         response.addCookie(refreshCookie);
-        response.addCookie(accessCookie);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }

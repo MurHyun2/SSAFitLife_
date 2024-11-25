@@ -1,0 +1,11 @@
+package com.ssafy.ssafitlife.Calendar.model.Dao;
+
+import java.util.List;
+
+import com.ssafy.ssafitlife.Calendar.model.dto.Calendar;
+
+public interface CalendarDao {
+
+	List<Calendar> getList(int memNo);
+
+}

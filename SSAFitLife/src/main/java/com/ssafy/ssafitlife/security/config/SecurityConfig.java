@@ -53,11 +53,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*")); // 와일드카드 포트 사용
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://*:*")); // 와일드카드 포트 사용
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // OPTIONS 메소드 추가
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("access", "Content-Type")); // 응답 헤더로 "access"를 노출
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type")); // Authorization 헤더 노출
+        configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie")); // Set-Cookie 헤더 노출 추가
         configuration.setAllowCredentials(true); // 쿠키 허용
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafitlife.calendar.model.dao.PostDao">
+	
+	<!-- 몸무게 정보 조회 -->
+	<select id="getList" resultType="Calendar" parameterType="int">
+		select calendar_no,date,weight
+		 from calendar
+		Where
+	</select>
+	
+	<!-- 몸무게 정보 추가 -->
+	<insert id="insertWeight" parameterType="Calendar">
+	</insert>
+	
+	<!-- 몸무게 정보 수정 -->	
+	<update id="updateCalendar" parameterType="Calendar">
+	</update>
+	
+	
+</mapper>

@@ -1,0 +1,5 @@
+package com.ssafy.ssafitlife.post.model.dto;
+
+public class Calendar {
+
+}

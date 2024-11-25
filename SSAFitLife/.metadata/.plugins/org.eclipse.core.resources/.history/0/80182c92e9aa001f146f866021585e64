@@ -1,0 +1,10 @@
+package com.ssafy.ssafitlife.Calendar.model.service;
+
+import java.util.List;
+
+import com.ssafy.ssafitlife.post.model.dto.Calendar;
+
+public interface CalendarService {
+	List<Calendar> getCalendarList(int memNo);
+
+}

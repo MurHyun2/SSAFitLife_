@@ -1,162 +1,187 @@
 <template>
-  <div>
+  <div class="detail-container">
     <h2>상세 게시물</h2>
-    <div class="container">
-      <span class="title">
-        <span class="item">제목</span>
-        <span class="body">{{ list.postTitle }}</span>
-      </span>
-      <span class="create">
-        <span class="item">등록일</span>
-        <span class="body">{{ list.postCreatedDate }}</span>
-      </span>
-    </div>
-    <div class="container">
+    <div class="content-wrapper">
+      <div class="info-row">
+        <span class="info-group">
+          <span class="label">제목</span>
+          <span class="value">{{ list.postTitle }}</span>
+        </span>
+        <span class="info-group">
+          <span class="label">등록일</span>
+          <span class="value">{{ list.postCreatedDate }}</span>
+        </span>
+      </div>
 
-      <span class="writer">
-        <span class="item">작성자</span>
-        <span class="body">{{ list.memNo }}</span>
-      </span>
-      <span class="update">
-        <span class="item">수정일</span>
-        <span class="body">{{ list.postUpdatedDate }}</span>
-      </span>
-    </div>
+      <div class="info-row">
+        <span class="info-group">
+          <span class="label">작성자</span>
+          <span class="value">{{ list.nickname }}</span>
+        </span>
+        <span class="info-group">
+          <span class="label">수정일</span>
+          <span class="value">{{ list.postUpdatedDate }}</span>
+        </span>
+      </div>
 
-    <div class="container">
-      <span class="views">
-        <span class="item">조회수</span>
-        <span class="body">{{ list.postViews }}</span>
-      </span>
-    </div>
+      <div class="info-row">
+        <span class="info-group">
+          <span class="label">조회수</span>
+          <span class="value">{{ list.postViews }}</span>
+        </span>
+      </div>
 
-    <div class="container">
-      <span class="content">
-        <span class="item">내용</span>
-        <span class="body">{{ list.postContent }}</span>
-      </span>
-    </div>
-    
-    <div class="buttons">
-      <RouterLink class="update-button" :to="{ name: 'postUpdate'}">수정</RouterLink>
-      <RouterLink class="delete-button" :to="{name: 'postList'}" @click="requestPostDelete">삭제</RouterLink>
-      <RouterLink class="post-button" :to="{name: 'postList'}">목록</RouterLink>
-    </div>
+      <div class="content-box">
+        <span class="label">내용</span>
+        <div class="content-value">{{ list.postContent }}</div>
+      </div>
 
+      <div class="button-group">
+        <RouterLink class="btn btn-update" :to="{ name: 'postUpdate'}">수정</RouterLink>
+        <RouterLink class="btn btn-delete" :to="{name: 'posts'}" @click="requestPostDelete">삭제</RouterLink>
+        <RouterLink class="btn btn-list" :to="{name: 'posts'}">목록</RouterLink>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import axios from 'axios';
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+// 스크립트 부분은 동일하게 유지
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
+import axiosInstance from "@/plugins/axios.js";
+
 const route = useRoute()
-const category = ref(route.params.category)
-const currentView = ref(route.params.currentView)
+const currentMenu = ref('');
+const currentView = ref('');
 const postNo = ref(route.params.postNo)
 const list = ref({});
-const commentList = ref({
-  
-})
+const commentList = ref({});
 
-const requestPostDetail = async()=>{
-  const { data } = await axios.get(`http://localhost:8080/post/post/${postNo.value}`);
+const requestPostDetail = async () => {
+  const {data} = await axiosInstance.get(`http://localhost:8080/post/post/${postNo.value}`);
   list.value = data;
 }
 
-requestPostDetail();
-
-const requestPostDelete = async() => {
-  await axios.delete(`http://localhost:8080/post/post/${postNo.value}`);
+const requestPostDelete = async () => {
+  await axiosInstance.delete(`http://localhost:8080/post/post/${postNo.value}`);
   window.location.reload();
-} 
+}
 
+watch(() => route.path, async (path) => {
+      const [_, menu, view, postId] = path.split('/');
+      currentMenu.value = menu || '';
+      currentView.value = view || '';
+      postNo.value = postId || '';
 
-
-watch(()=>route.params.category,(newcategory)=>{
-  category.value = newcategory
-})
-watch(()=>route.params.currentView,(newcurrentView)=>{
-  currentView.value = newcurrentView
-})
-watch(()=>route.params.postNo,(newpostNo)=>{
-  postNo.value = newpostNo
-})
+      if (postNo.value) {
+        await requestPostDetail(postNo.value);
+      }
+    },
+    {immediate: true}
+);
 </script>
 
 <style scoped>
-  .buttons{
-    
-    display: flex;
-    margin-left: auto;
-    margin-right: 30%;
-    justify-content: flex-end;
-  }
-  .update-button,.delete-button,.post-button{
-    text-decoration: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
-    color: white;
-    background-color: #97d4e9;
-    border-radius: 35px;
-    width: 64px;
-    height: 27px;
-    margin: 10px;
-    
-    /* flex-shrink: 0; */
-  }
-  .update-button{
-    color: blue;
-  }
-  .delete-button{
-    color: red;
-  }
-  .post-button{
-    color: gray;
-  }
-.container{
-  position: relative;
+.detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 40px;
+  font-size: 24px;
+}
+
+.content-wrapper {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.info-group {
   display: flex;
   align-items: center;
+  flex: 1;
 }
-.container span{
-  margin: 8px;
-  display: flex;
-}
-.item{
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+
+.label {
+  background-color: #b1def0;
   color: white;
-  background-color: #97d4e9;
-  border-radius: 35px;
-  width: 64px;
-  height: 27px;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 80px;
+  text-align: center;
+  margin-right: 15px;
 }
-.title{
-  flex:1;
+
+.value {
+  flex: 1;
+  padding: 8px;
+  color: #495057;
 }
-.writer{
-  flex:1;
+
+.content-box {
+  margin-top: 30px;
 }
-.create{
-  flex:1;
+
+.content-value {
+  margin-top: 15px;
+  padding: 20px;
+  min-height: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #495057;
+  line-height: 1.6;
 }
-.update{
-  flex:1;
-}
-.body{
+
+.button-group {
   display: flex;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
 }
-h2{
-  display: flex;
-  justify-content: center;
-  margin-bottom: 60px;
- }
+
+.btn {
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-update {
+  background-color: #b1def0;
+  color: white;
+}
+
+.btn-delete {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.btn-list {
+  background-color: #adb5bd;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 </style>

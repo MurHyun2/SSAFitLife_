@@ -1,165 +1,176 @@
 <template>
-  <div>
-    <h2>게시물 수정</h2>
+  <div class="regist-container">
+    <h2>게시물 등록</h2>
+    <div class="content-wrapper">
       <form @submit.prevent="registPost">
-          <div class="container">
-      <span class="title">
-          <span class="item">제목</span>
-          <span class="body">
-          <input clas="update-title" type="text" v-model="newPostTitle" :placeholder = "'제목을 입력하세요.'">
-          </span>
-      </span>
-      <span class="create">
-          <span class="item">등록일</span>
-          <span class="body"></span>
-      </span>
-    </div>
-    <div class="container">
+        <div class="form-group">
+          <span class="label">제목</span>
+          <input 
+            class="input-field" 
+            type="text" 
+            v-model="newPostTitle" 
+            placeholder="제목을 입력하세요"
+          >
+        </div>
 
-      <span class="writer">
-          <span class="item">작성자</span>
-          <span class="body"></span>
-      </span>
-      <span class="update">
-        <span class="item">수정일</span>
-        <span class="body"></span>
-      </span>
-    </div>
+        <div class="form-group">
+          <span class="label">내용</span>
+          <textarea 
+            class="textarea-field" 
+            v-model="newPostContent" 
+            placeholder="내용을 입력하세요"
+          ></textarea>
+        </div>
 
-    <div class="container">
-      <span class="views">
-        <span class="item">조회수</span>
-        <span class="body"></span>
-      </span>
-    </div>
-
-    <div class="container">
-      <span class="content">
-        <span class="item">내용</span>
-        <textarea class="update-content" type="text" v-model="newPostContent" :placeholder = "'내용을 입력하세요.'"></textarea>
-      </span>
-    </div>
-    <div class="buttons">
-
-      <RouterLink class="regist-button" :to="{ name: 'postList'}" @click.native.prevent="registPost">
-        등록
-      </RouterLink>
-      <RouterLink class="post-button" :to="{name: 'postList'}">목록</RouterLink>
-    </div>
+        <div class="button-group">
+          <button class="btn btn-submit" type="submit">등록</button>
+          <RouterLink class="btn btn-list" :to="{ name: 'posts' }">목록</RouterLink>
+        </div>
       </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import axios from 'axios';
-  import { ref, watch } from 'vue';
-  import { useRoute } from 'vue-router';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import axiosInstance from "@/plugins/axios.js";
 
-  const route = useRoute()
-  const category = ref(route.params.category)
-  const currentView = ref(route.params.currentView)
-  const newPostTitle = ref('');
-  const newPostContent = ref('');
-  const userNo = ref('1');
-  const registPost = async () => {
-    await axios.post(`http://localhost:8080/post/post/${userNo.value}`, {
+const router = useRouter();
+const newPostTitle = ref('');
+const newPostContent = ref('');
+const userNo = ref('1');
+
+const registPost = async () => {
+  try {
+    await axiosInstance.post(`http://localhost:8080/post/post/${userNo.value}`, {
       postTitle: newPostTitle.value,
       postContent: newPostContent.value,
     });
-    alert('게시물이 성공적으로 되었습니다.');
-
-    window.location.reload();
+    alert('게시물이 성공적으로 등록되었습니다.');
+    await router.push({name: 'posts'});
+  } catch (error) {
+    console.error('게시물 등록 실패:', error);
+  }
 };
-
-
-
-  watch(()=>route.params.category,(newcategory)=>{
-      category.value = newcategory
-  })
-  watch(()=>route.params.currentView,(newcurrentView)=>{
-      currentView.value = newcurrentView
-  })
 </script>
 
 <style scoped>
-  .buttons{
-    margin-top: 20px;
-    display: flex;
-    margin-left: auto;
-    margin-right: 30%;
-    justify-content: flex-end;
-  }
-  .regist-button,.post-button{
-    text-decoration: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
-    color: white;
-    background-color: #97d4e9;
-    border-radius: 35px;
-    width: 64px;
-    height: 27px;
-    margin: 10px;
-    
-    /* flex-shrink: 0; */
-  }
-  .regist-button{
-    color: blue;
-  }
-  .detail-button{
-    color: black;
-  }
-  .post-button{
-    color: gray;
-  }
-
-
-  .container{
-      position: relative;
-      display: flex;
-      align-items: center;
+.regist-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
-.container span{
-  margin: 8px;
-  display: flex;
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 40px;
+  font-size: 24px;
 }
-.item{
+
+.content-wrapper {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.form-group {
+  margin-bottom: 25px;
   display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+  align-items: flex-start;
+}
+
+.label {
+  background-color: #b1def0;
   color: white;
-  background-color: #97d4e9;
-  border-radius: 35px;
-  width: 64px;
-  height: 27px;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 80px;
+  text-align: center;
+  margin-right: 15px;
+  display: inline-block;
 }
-.title{
-  flex:1;
+
+.input-field {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
 }
-.writer{
-  flex:1;
+
+.textarea-field {
+  flex: 1;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  min-height: 300px;
+  font-size: 16px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
 }
-.create{
-  flex:1;
+
+.input-field:focus,
+.textarea-field:focus {
+  outline: none;
+  border-color: #b1def0;
 }
-.update{
-  flex:1;
-}
-.body{
+
+.button-group {
   display: flex;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
 }
-.update-content {
-  width: 50vw;
-  height: 50vh;
+
+.btn {
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
- h2{
-  display: flex;
-  justify-content: center;
-  margin-bottom: 60px;
- }
+
+.btn-submit {
+  background-color: #b1def0;
+  color: white;
+}
+
+.btn-list {
+  background-color: #adb5bd;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .form-group {
+    flex-direction: column;
+  }
+  
+  .label {
+    margin-bottom: 10px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
 </style>

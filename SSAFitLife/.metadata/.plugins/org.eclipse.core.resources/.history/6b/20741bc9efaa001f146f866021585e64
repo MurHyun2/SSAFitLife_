@@ -1,0 +1,30 @@
+package com.ssafy.ssafitlife.Calendar.model.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.ssafy.ssafitlife.Calendar.model.Dao.CalendarDao;
+import com.ssafy.ssafitlife.Calendar.model.dto.Calendar;
+
+@Service
+public class CalendarServiceImpl implements CalendarService {
+	
+	private final CalendarDao calendarDao;
+	public CalendarServiceImpl(CalendarDao calendarDao) {
+		this.calendarDao = calendarDao;
+	}
+	@Override
+	public List<Calendar> getCalendarList(int memNo) {
+		return calendarDao.getList(memNo);
+	}
+	@Override
+	public boolean addWeight(Calendar calendar) {
+		;
+	}
+
+	
+	
+	
+	
+}

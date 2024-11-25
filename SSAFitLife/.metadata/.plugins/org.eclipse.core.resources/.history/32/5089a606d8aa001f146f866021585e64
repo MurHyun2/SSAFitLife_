@@ -1,0 +1,9 @@
+package com.ssafy.ssafitlife.post.model.dto;
+
+import java.math.BigDecimal;
+
+public class Calendar {
+	private Integer calendar_no;
+	private Integer weight;
+	private BigDecimal skeletal_muscle_mass;
+}

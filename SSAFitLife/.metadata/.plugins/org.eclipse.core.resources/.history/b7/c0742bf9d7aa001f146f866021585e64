@@ -1,0 +1,6 @@
+package com.ssafy.ssafitlife.post.model.dto;
+
+public class Calendar {
+	private Integer calendar_no;
+	BigDecimal
+}

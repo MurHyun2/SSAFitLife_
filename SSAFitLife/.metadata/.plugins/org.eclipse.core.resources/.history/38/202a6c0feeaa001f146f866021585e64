@@ -1,0 +1,7 @@
+package com.ssafy.ssafitlife.Calendar.model.Dao;
+
+public interface CalendarDao {
+
+	List getList(int memNo);
+
+}
