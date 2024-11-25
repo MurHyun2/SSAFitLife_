@@ -25,7 +25,7 @@ const menus = [
     basePath: 'weight-manage',
     views: [
       {label: '체중 관리', view: 'weight-manage'},
-      {label: '체조성 기록', view: 'body-record'},
+      // {label: '체조성 기록', view: 'body-record'},
       {label: '활동 관리', view: 'activity-manage'}
     ]
   },
@@ -34,8 +34,8 @@ const menus = [
     basePath: 'diet-manage',
     views: [
       {label: '식단 짜기', view: 'diet-plan'},
-      {label: '밀프렙 도우미', view: 'millprep-assist'},
-      {label: '보충제 활용', view: 'sup-use'}
+      // {label: '밀프렙 도우미', view: 'millprep-assist'},
+      // {label: '보충제 활용', view: 'sup-use'}
     ]
   },
   {

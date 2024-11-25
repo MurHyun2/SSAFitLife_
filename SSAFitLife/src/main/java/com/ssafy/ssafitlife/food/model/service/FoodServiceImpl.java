@@ -37,4 +37,9 @@ public class FoodServiceImpl implements FoodService {
     public void removeFood(Long foodNo) {
         foodDao.deleteFood(foodNo);
     }
+
+    @Override
+    public List<Food> getRegisteredFoods(Integer memNo) {
+        return foodDao.selectRegisteredFoods(memNo);
+    }
 }

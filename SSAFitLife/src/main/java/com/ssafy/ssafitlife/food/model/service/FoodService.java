@@ -19,4 +19,7 @@ public interface FoodService {
 
     // 음식 삭제
     void removeFood(Long foodNo);
+
+    // 작성한 음식 목록 조회
+    List<Food> getRegisteredFoods(Integer memNo);
 }

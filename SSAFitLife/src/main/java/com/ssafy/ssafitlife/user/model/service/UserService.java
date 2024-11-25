@@ -15,4 +15,10 @@ public interface UserService {
     User findByEmail(String email);
     //등록
     void saveUser(User user);
+    //수정
+    void modifyUser(User user);
+    //회원탈퇴
+    void removeUser(Integer memNo);
+    //비밀번호 업데이트
+    void modifyPassword(User user);
 }

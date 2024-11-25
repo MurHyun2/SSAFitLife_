@@ -15,40 +15,12 @@
         >
           식품 등록
         </button>
-      </div>
-
-      <!-- 식품 등록 폼 -->
-      <div v-if="activeTab === '식품 등록'" class="food-register-form">
-        <div class="form-group">
-          <label>식품명</label>
-          <input type="text" v-model="foodData.foodName" placeholder="식품명을 입력하세요"/>
-        </div>
-        <div class="form-group">
-          <label>1회 제공량 (g)</label>
-          <input type="number" v-model="foodData.foodAmt" placeholder="100"/>
-        </div>
-        <div class="nutrition-inputs">
-          <div class="form-group">
-            <label>칼로리 (kcal)</label>
-            <input type="number" v-model="foodData.foodCalorie" placeholder="0"/>
-          </div>
-          <div class="form-group">
-            <label>탄수화물 (g)</label>
-            <input type="number" v-model="foodData.foodCarb" placeholder="0"/>
-          </div>
-          <div class="form-group">
-            <label>단백질 (g)</label>
-            <input type="number" v-model="foodData.foodProtein" placeholder="0"/>
-          </div>
-          <div class="form-group">
-            <label>지방 (g)</label>
-            <input type="number" v-model="foodData.foodFat" placeholder="0"/>
-          </div>
-        </div>
-        <div class="modal-buttons">
-          <button @click="closeModal" class="cancel-btn">취소</button>
-          <button @click="registerFood" class="confirm-btn" :disabled="!isValidFood">등록하기</button>
-        </div>
+        <button
+            :class="['tab-button', { active: activeTab === '등록한 식품' }]"
+            @click="activeTab = '등록한 식품'"
+        >
+          등록한 식품
+        </button>
       </div>
 
       <!--  식품 목록 폼   -->
@@ -127,6 +99,91 @@
           <button @click="addFood" class="confirm-btn" :disabled="!canAdd">추가하기</button>
         </div>
       </div>
+
+      <!-- 식품 등록 폼 -->
+      <div v-if="activeTab === '식품 등록'" class="food-register-form">
+        <div class="form-group">
+          <label>식품명</label>
+          <input type="text" v-model="foodData.foodName" placeholder="식품명을 입력하세요"/>
+        </div>
+        <div class="form-group">
+          <label>1회 제공량 (g)</label>
+          <input type="number" v-model="foodData.foodAmt" placeholder="100"/>
+        </div>
+        <div class="nutrition-inputs">
+          <div class="form-group">
+            <label>칼로리 (kcal)</label>
+            <input type="number" v-model="foodData.foodCalorie" placeholder="0"/>
+          </div>
+          <div class="form-group">
+            <label>탄수화물 (g)</label>
+            <input type="number" v-model="foodData.foodCarb" placeholder="0"/>
+          </div>
+          <div class="form-group">
+            <label>단백질 (g)</label>
+            <input type="number" v-model="foodData.foodProtein" placeholder="0"/>
+          </div>
+          <div class="form-group">
+            <label>지방 (g)</label>
+            <input type="number" v-model="foodData.foodFat" placeholder="0"/>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button @click="registerFood" class="confirm-btn" :disabled="!isValidFood">등록하기</button>
+        </div>
+      </div>
+
+      <!-- 등록한 식품 폼 -->
+      <div v-if="activeTab === '등록한 식품'">
+        <!-- 검색 영역 -->
+        <div class="search-section">
+          <input
+              type="text"
+              v-model="registeredSearchKeyword"
+              placeholder="등록한 음식 검색"
+              class="search-input"
+              @input="searchRegisteredFood"
+          />
+        </div>
+
+        <!-- 검색 결과 목록 -->
+        <div class="search-results" @scroll="handleScroll">
+          <div
+              v-for="food in registeredSearchResults"
+              :key="food.foodNo"
+              class="food-item"
+              :class="{ 'selected': selectedFood?.foodNo === food.foodNo }"
+          >
+            <div class="food-info">
+              <div class="food-name">{{ food.foodName }}</div>
+              <div class="food-details">
+                <span>{{ food.foodAmt }} g / </span>
+                <span>{{ food.foodCalorie }} kcal</span>
+              </div>
+            </div>
+            <div class="nutrition-info">
+              <div class="nutrition-circle">
+                <span>탄수화물</span>
+                <span>{{ food.foodCarb }}g</span>
+              </div>
+              <div class="nutrition-circle">
+                <span>단백질</span>
+                <span>{{ food.foodProtein }}g</span>
+              </div>
+              <div class="nutrition-circle">
+                <span>지방</span>
+                <span>{{ food.foodFat }}g</span>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="edit-button" @click="editFood(food)">수정</button>
+              <button class="delete-button" @click="deleteFood(food)">삭제</button>
+            </div>
+          </div>
+          <div v-if="loading" class="loading">로딩 중...</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -134,6 +191,7 @@
 <script setup>
 import {ref, computed, onMounted, watch} from 'vue';
 import axiosInstance from '@/plugins/axios';
+import { v4 as uuidv4 } from 'uuid';
 
 const isOpen = ref(false);
 const activeTab = ref('식품 목록');
@@ -230,7 +288,7 @@ const searchFood = () => {
 
 const addFood = () => {
   const newDiet = {
-    // dietNo: Math.random(), // 임시 ID 생성
+    dietNo: uuidv4(), // 임시 dietNo 설정 -> 삭제처리 위해
     foodNo: selectedFood.value.foodNo,
     dietType: selectedMealType.value,
     foodQuantity: quantity.value,
@@ -285,24 +343,80 @@ const isValidFood = computed(() => {
       foodData.value.foodCalorie >= 0
 })
 
-const config = {
-  headers: {
-    'Authorization': `${localStorage.getItem('accessToken')}`,
-    'Content-Type': 'application/json'
-  }
-};
-
 const registerFood = async () => {
   try {
-    console.log(config)
-    await axiosInstance.post('/food', foodData.value, config)
+    await axiosInstance.post('/food', foodData.value)
+
     alert('식품이 등록되었습니다.')
-    closeModal()
+
+    foodData.value = {
+      foodName: '',
+      foodAmt: 100,
+      foodCalorie: 0,
+      foodCarb: 0,
+      foodProtein: 0,
+      foodFat: 0,
+      isShared: 1
+    }
+
+    await loadInitialData()
+    activeTab.value = '식품 목록'
   } catch (error) {
     console.error('식품 등록 실패:', error)
     alert('식품 등록에 실패했습니다.')
   }
 }
+
+// 등록한 식품 관련 상태 추가
+const registeredSearchKeyword = ref('');
+const registeredSearchResults = ref([]);
+const registeredFoods = ref([]);
+
+// 등록한 식품 검색 기능
+const searchRegisteredFood = () => {
+  if (registeredSearchKeyword.value) {
+    const filtered = registeredFoods.value.filter(food =>
+        food.foodName.toLowerCase().includes(registeredSearchKeyword.value.toLowerCase())
+    );
+    registeredSearchResults.value = filtered.slice(0, limit);
+  } else {
+    registeredSearchResults.value = registeredFoods.value.slice(0, limit);
+  }
+};
+
+// 식품 수정 함수
+const editFood = async (food) => {
+  try {
+    // 수정 로직 구현
+    await axiosInstance.put(`/food/${food.foodNo}`, food);
+    await loadRegisteredFoods();
+  } catch (error) {
+    console.error('식품 수정 실패:', error);
+  }
+};
+
+// 식품 삭제 함수
+const deleteFood = async (food) => {
+  if (confirm('정말 삭제하시겠습니까?')) {
+    try {
+      await axiosInstance.delete(`/food/${food.foodNo}`);
+      await loadRegisteredFoods();
+    } catch (error) {
+      console.error('식품 삭제 실패:', error);
+    }
+  }
+};
+
+// 등록한 식품 데이터 로드
+const loadRegisteredFoods = async () => {
+  try {
+    const response = await axiosInstance.get('/food/registered');
+    registeredFoods.value = response.data;
+    registeredSearchResults.value = registeredFoods.value.slice(0, limit);
+  } catch (error) {
+    console.error('등록한 식품 로드 실패:', error);
+  }
+};
 
 </script>
 
@@ -576,6 +690,37 @@ const registerFood = async () => {
 .confirm-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button, .delete-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-button {
+  background: #4CAF50;
+  color: white;
+}
+
+.delete-button {
+  background: #f44336;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #45a049;
+}
+
+.delete-button:hover {
+  background: #da190b;
 }
 
 </style>

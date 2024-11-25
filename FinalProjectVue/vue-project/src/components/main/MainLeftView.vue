@@ -1,7 +1,6 @@
 <template>
   <div class="container">
-    <div class="winter">WINTER</div>
-    <div class="sleeping">SLEEPING</div>
+    <div class="SSAFit">SSAFitLife</div>
 
     <RouterLink
         v-for="menu in menus"
@@ -72,14 +71,12 @@ const menus = [
   justify-content: flex-start; /* 자식 요소 위쪽 정렬 */
 }
 
-.winter {
-  font-size: 19px;
-  margin-top: 70px;
+.SSAFit {
+  font-size: 25px;
+  margin-top: 40px;
+  margin-bottom: 20px;
 }
 
-.sleeping {
-  margin-bottom: 75px;
-}
 
 .link {
   text-decoration: none;
