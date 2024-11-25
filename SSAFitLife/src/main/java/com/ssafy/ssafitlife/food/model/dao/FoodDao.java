@@ -10,4 +10,5 @@ public interface FoodDao {
     void insertFood(Food food);
     void updateFood(Food food);
     void deleteFood(Long foodNo);
+    List<Food> selectRegisteredFoods(Integer memNo);
 }

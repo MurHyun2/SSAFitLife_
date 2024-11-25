@@ -10,4 +10,7 @@ public interface UserDao {
     Boolean existsByNickname(String nickname);
     User selectByEmail(String email);
     void insertUser(User user);
+    void updateUser(User user);
+    void deleteUser(Integer memNo);
+    void updatePassword(User user);
 }

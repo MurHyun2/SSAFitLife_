@@ -3,20 +3,15 @@
     <div class="main-left">
       <MainLeftView/>
     </div>
-
     <div class="main-right">
-
       <div class="main-header">
         <MainHeaderView/>
       </div>
-
       <div class="main-body">
         <RouterView/>
       </div>
-
     </div>
   </div>
-
 </template>
 
 <script setup>
@@ -28,7 +23,7 @@ import MainLeftView from '@/components/main/MainLeftView.vue';
 
 .main-container {
   display: flex;
-  height: 100vh; /* 화면 전체 높이를 사용 */
+  height: 99vh; /* 화면 전체 높이를 사용 */
 }
 
 .main-left {

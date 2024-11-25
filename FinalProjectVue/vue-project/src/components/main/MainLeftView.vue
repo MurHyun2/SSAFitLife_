@@ -1,7 +1,6 @@
 <template>
   <div class="container">
-    <div class="winter">WINTER</div>
-    <div class="sleeping">SLEEPING</div>
+    <div class="SSAFit">SSAFitLife</div>
 
     <RouterLink
         v-for="menu in menus"
@@ -24,8 +23,18 @@ const route = useRoute();
 
 // 현재 라우트가 활성화된 메뉴를 판단하는 함수
 const isActive = (menuTo) => {
-  // 현재 라우트 경로와 menuTo 경로가 일치하는지 확인
-  return route.path === menuTo || route.path.startsWith(menuTo + '/');
+  // 홈 경로인 경우 특별 처리
+  if (menuTo === '/' && route.path === '/') {
+    return true;
+  }
+
+  // 메뉴 경로에서 첫 번째 세그먼트 추출
+  const menuPath = menuTo.split('/')[1];
+  // 현재 경로에서 첫 번째 세그먼트 추출
+  const currentPath = route.path.split('/')[1];
+
+  // 메뉴 세그먼트가 현재 경로의 세그먼트와 일치하는지 확인
+  return menuPath === currentPath;
 };
 
 const menus = [
@@ -48,16 +57,16 @@ const menus = [
     alt: 'DietMange',
   },
   {
-    label: '제품추천',
-    to: '/product-recommend/sup',
-    src: '/productRecommendButton.png',
-    alt: 'ProductRecommend',
-  },
-  {
     label: '게시판',
     to: '/board/posts',
     src: '/PostButton.png',
     alt: 'Post',
+  },
+  {
+    label: '제품추천',
+    to: '/product-recommend/sup',
+    src: '/productRecommendButton.png',
+    alt: 'ProductRecommend',
   },
 ];
 </script>
@@ -72,14 +81,12 @@ const menus = [
   justify-content: flex-start; /* 자식 요소 위쪽 정렬 */
 }
 
-.winter {
-  font-size: 19px;
-  margin-top: 70px;
+.SSAFit {
+  font-size: 25px;
+  margin-top: 40px;
+  margin-bottom: 20px;
 }
 
-.sleeping {
-  margin-bottom: 75px;
-}
 
 .link {
   text-decoration: none;

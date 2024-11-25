@@ -49,12 +49,12 @@
         <thead>
         <tr>
           <th>식사구분</th>
-          <th>음식</th>
-          <th>수량</th>
-          <th>칼로리</th>
-          <th>탄</th>
-          <th>단</th>
-          <th>지</th>
+          <th>음식명</th>
+          <th>중량(g)</th>
+          <th>열량(kcal)</th>
+          <th>탄(g)</th>
+          <th>단(g)</th>
+          <th>지(g)</th>
           <th>삭제</th>
         </tr>
         </thead>
@@ -350,8 +350,7 @@ watch(selectedDate, async (newDate) => {
 const saveDietList = async () => {
   try {
     const dietsToSave = diets.value.map(diet => ({
-      dietNo: diet.dietNo,
-      // memNo: diet.memNo,
+      ...(typeof diet.dietNo === 'number' && !isNaN(diet.dietNo) && { dietNo: diet.dietNo }),
       foodNo: diet.food.foodNo,
       dietType: diet.dietType,
       foodQuantity: diet.foodQuantity

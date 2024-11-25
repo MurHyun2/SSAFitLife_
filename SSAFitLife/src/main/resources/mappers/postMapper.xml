@@ -73,8 +73,4 @@
 		INSERT INTO files (file_id, file_name, post_id)
 		VALUES (#{fileId}, #{fileName}, #{id});
 	</insert>
-	
-	
-	
-	
 </mapper>

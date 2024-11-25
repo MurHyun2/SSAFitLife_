@@ -9,6 +9,8 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+
     private final UserDao userDao;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -50,5 +52,20 @@ public class UserServiceImpl implements UserService {
         user.setRole("ROLE_USER"); // 기본 권한 설정
 
         userDao.insertUser(user);
+    }
+
+    @Override
+    public void modifyUser(User user) {
+        userDao.updateUser(user);
+    }
+
+    @Override
+    public void removeUser(Integer memNo) {
+        userDao.deleteUser(memNo);
+    }
+
+    @Override
+    public void modifyPassword(User user) {
+        userDao.updatePassword(user);
     }
 }
