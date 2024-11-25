@@ -62,4 +62,24 @@
             #{phoneNumber}, #{nickname}, #{role}
         )
     </insert>
+
+    <!--  사용자 수정  -->
+    <update id="updateUser" parameterType="User">
+        UPDATE user
+        SET nickname = #{nickname}, phone_number = #{phoneNumber}, height = #{height}
+        WHERE email = #{email}
+    </update>
+
+    <!--  사용자 삭제  -->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM user
+        WHERE mem_no = #{memNo}
+    </delete>
+
+    <!--  비밀번호 수정  -->
+    <update id="updatePassword" parameterType="User">
+        UPDATE user
+        SET password = #{password}
+        WHERE email = #{email}
+    </update>
 </mapper>
