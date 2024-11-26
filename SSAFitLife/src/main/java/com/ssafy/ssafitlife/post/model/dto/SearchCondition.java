@@ -5,11 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class SearchCondition {
-	private String key;
-	private String word;
-	private String orderBy;
-	private String orderByDir;
+	private String searchType;
+	private String keyword;
+	private int page = 1;
+	private int size = 10;
+
+	public int getOffset() {
+		return (page - 1) * size;
+	}
+
+	// Getters and Setters
 }

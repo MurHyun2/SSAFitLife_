@@ -16,7 +16,9 @@
           <template #default="{ navigate }">
             <div class="post-row" @click="navigate">
               <span class="post-title">{{ list.postTitle }}</span>
-              <span class="post-content">{{ list.postContent }}</span>
+              <span class="post-content">
+                {{ list.postContent.length > 25 ? list.postContent.slice(0, 25) + ' ...' : list.postContent }}
+              </span>
               <span class="post-writer">{{ list.nickname }}</span>
               <span class="post-create">{{ list.postCreatedDate }}</span>
               <span class="post-views">{{ list.postViews }}</span>
@@ -27,13 +29,35 @@
     </div>
   </div>
 
-  <div class="board-footer">
-<!--    <div class="pagination">
-      <button class="page-btn" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
-      <span class="page-text">페이지 {{ currentPage }} / {{ totalPages }}</span>
-      <button class="page-btn" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">다음</button>
-    </div> -->
+  <div class="pagination">
+    <button
+        class="page-btn"
+        :disabled="currentPage === 1"
+        @click="changePage(currentPage - 1)"
+    >
+      이전
+    </button>
 
+    <span v-for="pageNum in totalPages" :key="pageNum">
+      <button
+          class="page-btn"
+          :class="{ active: pageNum === currentPage }"
+          @click="changePage(pageNum)"
+      >
+        {{ pageNum }}
+      </button>
+    </span>
+
+    <button
+        class="page-btn"
+        :disabled="currentPage === totalPages"
+        @click="changePage(currentPage + 1)"
+    >
+      다음
+    </button>
+  </div>
+
+  <div class="board-footer">
     <div class="button-container">
       <RouterLink class="regist-button" :to="{ name: 'postRegist'}">등록</RouterLink>
     </div>
@@ -44,8 +68,15 @@
         <option>내용</option>
         <option>작성자</option>
       </select>
-      <input type="text" class="search-input" :placeholder="`검색할 ${searchStandard} 입력`"/>
-      <button class="search-button">검색</button>
+      <input
+          type="text"
+          class="search-input"
+          v-model="searchKeyword"
+          :placeholder="`검색할 ${searchStandard} 입력`"
+          @keyup.enter="searchPosts"
+      />
+      <button class="search-button" @click="searchPosts">검색</button>
+      <button class="reset-button" @click="resetSearch">초기화</button>
     </div>
   </div>
 </template>
@@ -55,31 +86,72 @@ import {ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import axiosInstance from "@/plugins/axios.js";
 
-const route = useRoute();
 const currentMenu = ref('');
 const currentView = ref('');
+const route = useRoute();
 const lists = ref([]);
 const searchStandard = ref('제목');
+const searchKeyword = ref(''); // 검색어를 저장할 ref 추가
+const currentPage = ref(1);
+const totalPages = ref(1);
+const pageSize = ref(10);
 
 const requestPostList = async () => {
   try {
-    const {data} = await axiosInstance.get('http://localhost:8080/post/post');
-    lists.value = data;
+    const { data } = await axiosInstance.get('/post/post', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    });
+    lists.value = data.content;
+    totalPages.value = data.totalPages;
   } catch (error) {
     console.error('게시물 리스트를 불러오는데 실패했습니다:', error);
   }
 };
 
+const changePage = async (page) => {
+  currentPage.value = page;
+  if (searchKeyword.value) {
+    await searchPosts();
+  } else {
+    await requestPostList();
+  }
+};
+
+const searchPosts = async () => {
+  try {
+    const params = {
+      searchType: searchStandard.value,
+      keyword: searchKeyword.value,
+      page: currentPage.value,
+      size: pageSize.value
+    };
+
+    const { data } = await axiosInstance.get('/post/search', { params });
+    lists.value = data.content;
+    totalPages.value = data.totalPages;
+  } catch (error) {
+    console.error('검색 중 오류가 발생했습니다:', error);
+  }
+};
+
+// 검색어 초기화 함수 추가
+const resetSearch = () => {
+  searchKeyword.value = '';
+  requestPostList();
+};
+
 watch(() => route.path, async (path) => {
-      const [_, menu, view] = path.split('/');
-      currentMenu.value = menu || '';
-      currentView.value = view || '';
-      if (menu === 'board') {
-        await requestPostList();
-      }
-    },
-    {immediate: true}
-);
+  const [_, menu, view] = path.split('/');
+  currentMenu.value = menu || '';
+  currentView.value = view || '';
+  if (menu === 'board') {
+    await requestPostList();
+  }
+}, { immediate: true });
+
 </script>
 
 <style scoped>
@@ -207,5 +279,50 @@ watch(() => route.path, async (path) => {
 
 .search-button:hover {
   background-color: #97d4e9;
+}
+
+.reset-button {
+  padding: 8px 16px;
+  background-color: #f0b1b1;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.reset-button:hover {
+  background-color: #e99797;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.page-btn {
+  padding: 8px 16px;
+  border: 1px solid #b1def0;
+  background-color: white;
+  color: #b1def0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #b1def0;
+  color: white;
+}
+
+.page-btn.active {
+  background-color: #b1def0;
+  color: white;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

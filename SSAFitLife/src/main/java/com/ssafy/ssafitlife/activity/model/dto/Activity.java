@@ -5,14 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Activity {
-
-	private int actNo;
-	private int memNo;
+	private Long actNo;
+	private Integer memNo;
 	private String actName;
-	private String actInten;
-	private String actCalorie;
+	private Float actInten;
+	private Float actCalorie;
 	private boolean isShared;
 }

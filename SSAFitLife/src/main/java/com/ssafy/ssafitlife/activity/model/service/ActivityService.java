@@ -1,13 +1,13 @@
-package com.ssafy.ssafitlife.activity.model.dao;
+package com.ssafy.ssafitlife.activity.model.service;
 
 import com.ssafy.ssafitlife.activity.model.dto.Activity;
 import com.ssafy.ssafitlife.activity.model.dto.SaveActivity;
 
 import java.util.List;
 
-public interface ActivityDao {
-    List<Activity> selectAllActivities();
-    List<SaveActivity> selectActivitiesByDate(SaveActivity activity);
+public interface ActivityService {
+    List<Activity> getAllActivities();
+    List<SaveActivity> getActivitiesByDate(String date, Integer memNo);
     void updateSaveActivity(SaveActivity activity);
     void deleteSaveActivity(Long saveActNo);
 }

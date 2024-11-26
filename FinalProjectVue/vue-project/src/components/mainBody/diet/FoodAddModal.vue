@@ -138,25 +138,11 @@
 
       <!-- 등록한 식품 폼 -->
       <div v-if="activeTab === '등록한 식품'">
-        <!-- 검색 영역 -->
         <div class="search-section">
-          <input
-              type="text"
-              v-model="registeredSearchKeyword"
-              placeholder="등록한 음식 검색"
-              class="search-input"
-              @input="searchRegisteredFood"
-          />
+          <input type="text" v-model="registeredSearchKeyword" placeholder="등록한 음식 검색" class="search-input" @input="searchRegisteredFood" />
         </div>
-
-        <!-- 검색 결과 목록 -->
         <div class="search-results">
-          <div
-              v-for="food in registeredSearchResults"
-              :key="food.foodNo"
-              class="food-item"
-              :class="{ 'selected': selectedFood?.foodNo === food.foodNo }"
-          >
+          <div v-for="food in registeredSearchResults" :key="food.foodNo" class="food-item" :class="{ 'selected': selectedFood?.foodNo === food.foodNo }" @click="selectFood(food)">
             <div class="food-info">
               <div class="food-name">{{ food.foodName }}</div>
               <div class="food-details">
@@ -178,16 +164,38 @@
                 <span>{{ food.foodFat }}g</span>
               </div>
             </div>
-            <div class="action-buttons">
+            <div class="action-buttons" @click.stop>
+              <button class="add-button" @click="selectFood(food)">+</button>
               <button class="edit-button" @click="editFood(food)">수정</button>
               <button class="delete-button" @click="deleteFood(food)">삭제</button>
             </div>
           </div>
-          <div v-if="loading" class="loading">로딩 중...</div>
         </div>
-          <div class="modal-buttons">
-            <button @click="closeModal" class="cancel-btn">취소</button>
+
+        <!-- 선택된 음식 수량 입력 -->
+        <div v-if="selectedFood" class="quantity-section">
+          <div class="selected-food-info">
+            <span>{{ selectedFood.foodName }}</span>
+            <div class="quantity-input">
+              <input type="number" v-model="quantity" min="0.1" step="0.1"/>
+              <span>인분</span>
+            </div>
           </div>
+        </div>
+
+        <!-- 식사 구분 선택 -->
+        <div v-if="selectedFood" class="meal-type-selection">
+          <button v-for="type in mealTypes" :key="type.id"
+                  :class="['meal-type-btn', { active: selectedMealType === type.id }]"
+                  @click="selectedMealType = type.id">
+            {{ type.name }}
+          </button>
+        </div>
+
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button @click="addFood" class="confirm-btn" :disabled="!canAdd">추가하기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -443,6 +451,11 @@ const loadRegisteredFoods = async () => {
   }
 }
 
+watch(activeTab, () => {
+  selectedFood.value = null;
+  quantity.value = 1;
+  selectedMealType.value = null;
+});
 </script>
 
 <style scoped>

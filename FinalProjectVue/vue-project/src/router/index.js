@@ -71,21 +71,14 @@ const router = createRouter({
     routes
 });
 
-// 라우터 가드에서 checkToken 실행
-// const { isLoggedIn, checkToken } = useAuth();
-// router.beforeEach(async (to, from, next) => {
-//   // 메인 페이지 이후의 경로인지 확인
-//   if (to.path.startsWith('/main')) {
-//     await checkToken(); // `main` 경로 이후부터 실행
-//
-//     // 로그인 필요 여부에 따라 라우트 제어
-//     // if (to.meta.requiresAuth && !isLoggedIn.value) {
-//     if (!isLoggedIn.value) {
-//       alert('로그인이 필요합니다.');
-//       return next({ name: 'front' }); // 로그인 페이지로 리다이렉트
-//     }
-//   }
-//   next(); // 라우트 진행
-// });
+router.beforeEach((to, from, next) => {
+    const accessToken = localStorage.getItem('accessToken')
 
+    if (!accessToken && to.path !== '/') {
+        alert('로그인이 필요한 서비스입니다.')
+        next('/')
+    } else {
+        next()
+    }
+})
 export default router;

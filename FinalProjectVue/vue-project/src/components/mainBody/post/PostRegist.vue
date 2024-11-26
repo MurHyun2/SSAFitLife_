@@ -39,11 +39,10 @@ import axiosInstance from "@/plugins/axios.js";
 const router = useRouter();
 const newPostTitle = ref('');
 const newPostContent = ref('');
-const userNo = ref('1');
 
 const registPost = async () => {
   try {
-    await axiosInstance.post(`http://localhost:8080/post/post/${userNo.value}`, {
+    await axiosInstance.post(`/post/post`, {
       postTitle: newPostTitle.value,
       postContent: newPostContent.value,
     });
