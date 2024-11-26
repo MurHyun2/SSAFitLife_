@@ -760,5 +760,53 @@ watch(activeTab, () => {
 .delete-button:hover {
   background: #da190b;
 }
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 400px;  /* 500px에서 400px로 축소 */
+  border-radius: 16px;
+  padding: 16px;     /* 24px에서 16px로 축소 */
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
 
+.activities-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;      /* 10px에서 8px로 축소 */
+  max-height: 250px; /* 300px에서 250px로 축소 */
+  margin: 0 -16px;   /* 패딩값 맞춤 */
+  padding: 0 16px;   /* 패딩값 맞춤 */
+}
+
+.activity-item {
+  padding: 12px;     /* 16px에서 12px로 축소 */
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+  background: #f8f9fa;
+}
+
+.selected-section {
+  margin: 12px 0;    /* 20px에서 12px로 축소 */
+  padding: 12px;     /* 20px에서 12px로 축소 */
+}
+
+.search-input {
+  width: calc(100% - 24px); /* 패딩값을 고려한 전체 너비 계산 */
+  padding: 10px 12px 10px 36px; /* 좌측 아이콘 공간 확보 */
+  font-size: 14px;   /* 16px에서 14px로 축소 */
+}
+
+.modal-buttons {
+  margin-top: 16px;  /* 24px에서 16px로 축소 */
+  gap: 8px;         /* 12px에서 8px로 축소 */
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 8px 16px; /* 12px 24px에서 축소 */
+  font-size: 14px;   /* 16px에서 14px로 축소 */
+}
 </style>

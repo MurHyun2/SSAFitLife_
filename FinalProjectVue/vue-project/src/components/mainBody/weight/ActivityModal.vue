@@ -1,70 +1,166 @@
 <template>
   <div v-if="isOpen" class="modal-overlay">
     <div class="modal-content">
-      <!-- 모달 헤더 -->
-      <div class="modal-header">
-        <h3>활동 추가</h3>
-        <button class="close-btn" @click="closeModal">×</button>
-      </div>
-
-      <!-- 검색 영역 -->
-      <div class="search-section">
-        <input
-            type="text"
-            v-model="searchKeyword"
-            placeholder="활동 검색"
-            class="search-input"
-            @input="searchActivities"
-        />
-      </div>
-
-      <!-- 활동 목록 -->
-      <div class="activities-list" @scroll="handleScroll">
-        <div
-            v-for="activity in filteredActivities"
-            :key="activity.actNo"
-            class="activity-item"
-            :class="{ 'selected': selectedActivity?.actNo === activity.actNo }"
-            @click="selectActivity(activity)"
+      <!-- 탭 메뉴 -->
+      <div class="tab-menu">
+        <button
+            :class="['tab-button', { active: activeTab === '활동 목록' }]"
+            @click="activeTab = '활동 목록'"
         >
-          <div class="activity-info">
-            <div class="activity-name">{{ activity.actName }}</div>
-            <div class="activity-details">
-              <span>{{ activity.actInten }} MET</span>
+          활동 목록
+        </button>
+        <button
+            :class="['tab-button', { active: activeTab === '활동 등록/수정' }]"
+            @click="activeTab = '활동 등록/수정'"
+        >
+          활동 등록/수정
+        </button>
+        <button
+            :class="['tab-button', { active: activeTab === '등록한 활동' }]"
+            @click="activeTab = '등록한 활동'"
+        >
+          등록한 활동
+        </button>
+      </div>
+
+      <!-- 활동 목록 폼 -->
+      <div v-if="activeTab === '활동 목록'">
+        <div class="search-section">
+          <input
+              type="text"
+              v-model="searchKeyword"
+              placeholder="활동 검색"
+              class="search-input"
+              @input="searchActivity"
+          />
+        </div>
+
+        <div class="search-results" @scroll="handleScroll">
+          <div v-for="activity in searchResults"
+               :key="activity.actNo"
+               class="activity-item"
+               :class="{ 'selected': selectedActivity?.actNo === activity.actNo }"
+               @click="selectActivity(activity)"
+          >
+            <div class="activity-info">
+              <div class="activity-name">{{ activity.actName }}</div>
+              <div class="activity-details">
+                <span>{{ activity.actInten }} MET / {{ activity.actInten * 50 }} kcal</span>
+              </div>
+            </div>
+            <button class="add-button" @click="selectActivity(activity)">+</button>
+          </div>
+          <div v-if="loading" class="loading">로딩 중...</div>
+        </div>
+
+        <!-- 선택된 활동 정보 -->
+        <div v-if="selectedActivity" class="quantity-section">
+          <div class="selected-activity-info">
+            <span>{{ selectedActivity.actName }}</span>
+            <div class="duration-input">
+              <input
+                  type="number"
+                  v-model="duration"
+                  min="0.5"
+                  max="24"
+                  step="0.5"
+              />
+              <span>시간</span>
             </div>
           </div>
         </div>
-        <div v-if="loading" class="loading">로딩 중...</div>
-      </div>
 
-      <!-- 선택된 활동 정보 -->
-      <div v-if="selectedActivity" class="selected-section">
-        <div class="selected-activity-info">
-          <span class="selected-name">{{ selectedActivity.actName }}</span>
-          <div class="duration-input">
-            <label>활동 시간</label>
-            <input
-                type="number"
-                v-model="duration"
-                min="0.5"
-                max="24"
-                step="0.5"
-            />
-            <span>시간</span>
-          </div>
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button
+              @click="addActivity"
+              class="confirm-btn"
+              :disabled="!canAdd"
+          >
+            추가하기
+          </button>
         </div>
       </div>
 
-      <!-- 버튼 영역 -->
-      <div class="modal-buttons">
-        <button @click="closeModal" class="cancel-btn">취소</button>
-        <button
-            @click="addActivity"
-            class="confirm-btn"
-            :disabled="!canAdd"
-        >
-          추가하기
-        </button>
+      <!-- 활동 등록/수정 폼 -->
+      <div v-if="activeTab === '활동 등록/수정'" class="activity-register-form">
+        <div class="form-group">
+          <label>활동명</label>
+          <input type="text" v-model="activityData.actName" placeholder="활동명을 입력하세요"/>
+        </div>
+        <div class="form-group">
+          <label>MET( 1 MET = 50 kcal )</label>
+          <input type="number" v-model="activityData.actInten" placeholder="0"/>
+        </div>
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button
+              @click="registerActivity"
+              class="confirm-btn"
+              :disabled="!isValidActivity"
+          >
+            {{ isEditMode ? '수정하기' : '등록하기' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 등록한 활동 목록 -->
+      <div v-if="activeTab === '등록한 활동'">
+        <div class="search-section">
+          <input
+              type="text"
+              v-model="registeredSearchKeyword"
+              placeholder="등록한 활동 검색"
+              class="search-input"
+              @input="searchRegisteredActivity"
+          />
+        </div>
+        <div class="search-results" @scroll="handleRegisteredScroll">
+          <div v-for="activity in registeredActivities"
+               :key="activity.actNo"
+               class="activity-item"
+               @click="selectActivity(activity)"
+          >
+            <div class="activity-info">
+              <div class="activity-name">{{ activity.actName }}</div>
+              <div class="activity-details">
+                <span class="met-badge">{{ activity.actInten }} MET / {{ activity.actInten * 50 }} kcal</span>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="add-button">+</button>
+              <button class="edit-button" @click="editActivity(activity)">수정</button>
+              <button class="delete-button" @click="deleteActivity(activity)">삭제</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 선택된 활동 정보 추가 -->
+        <div v-if="selectedActivity" class="quantity-section">
+          <div class="selected-activity-info">
+            <span>{{ selectedActivity.actName }} </span>
+            <div class="duration-input">
+              <input
+                  type="number"
+                  v-model="duration"
+                  min="0.5"
+                  max="24"
+                  step="0.5"
+              />
+              <span>시간</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button
+              @click="addActivity"
+              class="confirm-btn"
+              :disabled="!canAdd"
+          >
+            추가하기
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -77,53 +173,90 @@ import axiosInstance from '@/plugins/axios'
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: false
+    required: true
   }
 })
 
 const emit = defineEmits(['update:isOpen', 'activity-added'])
 
+// 상태 관리
+const activeTab = ref('활동 목록')
 const searchKeyword = ref('')
 const selectedActivity = ref(null)
 const duration = ref(1)
+const activities = ref([])
 const searchResults = ref([])
 const loading = ref(false)
+const page = ref(1)
+const limit = 10
+const pageSize = 10
 
-const filteredActivities = computed(() => {
-  if (!searchKeyword.value) return searchResults.value
-  return searchResults.value.filter(activity =>
-      activity.actName.toLowerCase().includes(searchKeyword.value.toLowerCase())
-  )
+
+// 활동 등록/수정 관련
+const isEditMode = ref(false)
+const editingActNo = ref(null)
+const activityData = ref({
+  actName: '',
+  actInten: 0,
 })
 
+// 등록한 활동 관련
+const registeredSearchKeyword = ref('')
+const registeredActivities = ref([])
+const registeredPage = ref(1)
+const registeredLoading = ref(false)
+const registeredHasMore = ref(true)
+const allRegisteredActivities = ref([]) // 전체 목록 저장용 추가
+
+// Computed Properties
 const canAdd = computed(() => {
   return selectedActivity.value && duration.value > 0 && duration.value <= 24
 })
 
-// 초기 활동 목록 로드
-const loadInitialActivities = async () => {
+const isValidActivity = computed(() => {
+  return activityData.value.actName && activityData.value.actInten > 0
+})
+
+// Methods
+const loadInitialData = async () => {
   try {
-    const { data } = await axiosInstance.get('/activity/list')
-    searchResults.value = data
+    const response = await axiosInstance.get('/activity/list')
+    activities.value = response.data
+    searchResults.value = activities.value.slice(0, limit)
   } catch (error) {
-    console.error('활동 목록 로드 실패:', error)
+    console.error('활동 데이터 로드 실패:', error)
   }
 }
 
-// 검색어 변경 시 디바운스 처리
-let searchTimeout
-const searchActivities = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(async () => {
-    try {
-      const { data } = await axiosInstance.get('/activity/list', {
-        params: { keyword: searchKeyword.value }
-      })
-      searchResults.value = data
-    } catch (error) {
-      console.error('활동 검색 실패:', error)
-    }
-  }, 300)
+const handleScroll = (e) => {
+  const element = e.target
+  const { scrollTop, scrollHeight, clientHeight } = element
+  if (scrollHeight - scrollTop <= clientHeight + 10) {
+    loadMore()
+  }
+}
+
+const loadMore = () => {
+  if (loading.value) return
+  loading.value = true
+
+  const nextPage = page.value + 1
+  const start = (nextPage - 1) * limit
+  const end = start + limit
+
+  const currentResults = searchKeyword.value
+      ? activities.value.filter(activity =>
+          activity.actName.toLowerCase().includes(searchKeyword.value.toLowerCase())
+      )
+      : activities.value
+
+  if (start < currentResults.length) {
+    const newItems = currentResults.slice(start, end)
+    searchResults.value = [...searchResults.value, ...newItems]
+    page.value = nextPage
+  }
+
+  loading.value = false
 }
 
 const selectActivity = (activity) => {
@@ -133,14 +266,104 @@ const selectActivity = (activity) => {
 
 const addActivity = () => {
   if (canAdd.value) {
-    const newActivity = {
+    emit('activity-added', {
       actNo: selectedActivity.value.actNo,
       actTime: duration.value,
       actName: selectedActivity.value.actName,
       actInten: selectedActivity.value.actInten
+    })
+    selectedActivity.value = null
+    duration.value = 1
+  }
+}
+
+const registerActivity = async () => {
+  try {
+    if (isEditMode.value) {
+      await axiosInstance.put(`/activity/${editingActNo.value}`, activityData.value)
+      alert('활동이 수정되었습니다.')
+    } else {
+      await axiosInstance.post('/activity', activityData.value)
+      alert('활동이 등록되었습니다.')
     }
-    emit('activity-added', newActivity)
-    closeModal()
+
+    // 폼 초기화
+    activityData.value = {
+      actName: '',
+      actInten: 0,
+    }
+    isEditMode.value = false
+    editingActNo.value = null
+
+    // 활동 목록 새로고침 후 탭 전환
+    await loadRegisteredActivities(true)  // true를 전달하여 처음부터 다시 로드
+    activeTab.value = '등록한 활동'
+
+  } catch (error) {
+    console.error('활동 처리 실패:', error)
+    alert(isEditMode.value ? '활동 수정에 실패했습니다.' : '활동 등록에 실패했습니다.')
+  }
+}
+
+const loadRegisteredActivities = async () => {
+  try {
+    const { data } = await axiosInstance.get('/activity/registered')
+    allRegisteredActivities.value = data  // 전체 데이터 저장
+    registeredActivities.value = data     // 화면에 표시할 데이터
+  } catch (error) {
+    console.error('등록한 활동 로드 실패:', error)
+  }
+}
+
+// 검색어 변경 감지
+watch(registeredSearchKeyword, () => {
+  searchRegisteredActivity()
+})
+
+// 등록한 활동 검색
+const searchRegisteredActivity = () => {
+  if (!registeredSearchKeyword.value) {
+    registeredActivities.value = allRegisteredActivities.value
+    return
+  }
+
+  const keyword = registeredSearchKeyword.value.toLowerCase()
+  registeredActivities.value = allRegisteredActivities.value.filter(activity =>
+      activity.actName.toLowerCase().includes(keyword)
+  )
+}
+
+// 등록한 활동 수정
+const editActivity = (activity) => {
+  isEditMode.value = true
+  editingActNo.value = activity.actNo
+  activityData.value = {
+    actName: activity.actName,
+    actInten: activity.actInten,
+    isShared: activity.isShared
+  }
+  activeTab.value = '활동 등록/수정'  // 탭 전환
+}
+
+// 등록한 활동 삭제
+const deleteActivity = async (activity) => {
+  if (confirm('정말 삭제하시겠습니까?')) {
+    try {
+      await axiosInstance.delete(`/activity/${activity.actNo}`)
+      await loadRegisteredActivities(true)
+      alert('활동이 삭제되었습니다.')
+    } catch (error) {
+      console.error('활동 삭제 실패:', error)
+      alert('활동 삭제에 실패했습니다.')
+    }
+  }
+}
+
+// 무한 스크롤 핸들러
+const handleRegisteredScroll = async (e) => {
+  const { scrollTop, scrollHeight, clientHeight } = e.target
+  if (scrollHeight - scrollTop <= clientHeight + 50) {
+    await loadRegisteredActivities()
   }
 }
 
@@ -149,11 +372,41 @@ const closeModal = () => {
   selectedActivity.value = null
   duration.value = 1
   searchKeyword.value = ''
+  searchResults.value = []
+  page.value = 1
+  activityData.value = {
+    actName: '',
+    actInten: 0,
+  }
 }
 
-watch(() => props.isOpen, (newValue) => {
+// Watchers
+watch(() => props.isOpen, async (newValue) => {
   if (newValue) {
-    loadInitialActivities()
+    await loadInitialData()
+    await loadRegisteredActivities()
+  }
+})
+
+watch(activeTab, () => {
+  selectedActivity.value = null
+  duration.value = 1
+})
+
+const searchActivity = () => {
+  page.value = 1
+  if (searchKeyword.value) {
+    const filtered = activities.value.filter(activity =>
+        activity.actName.toLowerCase().includes(searchKeyword.value.toLowerCase())
+    )
+    searchResults.value = filtered.slice(0, limit)
+  } else {
+    searchResults.value = activities.value.slice(0, limit)
+  }
+}
+watch(() => props.isOpen, async (newValue) => {
+  if (newValue) {
+    await loadRegisteredActivities(true)
   }
 })
 </script>
@@ -174,37 +427,60 @@ watch(() => props.isOpen, (newValue) => {
 
 .modal-content {
   background: white;
-  width: 95%;
-  max-width: 500px;
+  width: 90%;
+  max-width: 400px;
   border-radius: 12px;
   padding: 20px;
   max-height: 85vh;
+  overflow-y: auto;
+}
+
+.tab-menu {
   display: flex;
-  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  background: transparent;
+  font-size: 16px;
+  color: #666;
+}
+
+.tab-button.active {
+  background: transparent;
+  color: #2196f3;
+  font-weight: bold;
+  border-bottom: 2px solid #2196f3;
 }
 
 .search-input {
-  width: 100%;
-  padding: 12px;
+  width: 90%;
+  padding: 12px 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 16px;
 }
 
-.activities-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
+.activity-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  gap: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.activity-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
+.activity-item:hover {
+  background-color: #f5f5f5;
 }
 
 .activity-item.selected {
@@ -213,12 +489,14 @@ watch(() => props.isOpen, (newValue) => {
 }
 
 .activity-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .activity-name {
+  font-size: 16px;
   font-weight: bold;
-  margin-bottom: 4px;
 }
 
 .activity-details {
@@ -234,13 +512,22 @@ watch(() => props.isOpen, (newValue) => {
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
 }
 
-.selected-section {
+.quantity-section {
   margin-top: 20px;
   padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
+}
+
+.selected-activity-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
 }
 
 .duration-input {
@@ -250,10 +537,11 @@ watch(() => props.isOpen, (newValue) => {
 }
 
 .duration-input input {
-  width: 80px;
+  width: 50px;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  text-align: right;
 }
 
 .modal-buttons {
@@ -279,9 +567,75 @@ watch(() => props.isOpen, (newValue) => {
   background: #f0f0f0;
 }
 
-.loading {
-  text-align: center;
+.search-results {
+  max-height: 400px;
+  overflow-y: auto;
   padding: 10px;
+}
+
+.activity-register-form {
+  padding: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
   color: #666;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.nutrition-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.confirm-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button, .delete-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-button {
+  background: #4CAF50;
+  color: white;
+}
+
+.delete-button {
+  background: #f44336;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #45a049;
+}
+
+.delete-button:hover {
+  background: #da190b;
 }
 </style>

@@ -3,16 +3,18 @@ package com.ssafy.ssafitlife.activity.model.service;
 import com.ssafy.ssafitlife.activity.model.dao.ActivityDao;
 import com.ssafy.ssafitlife.activity.model.dto.Activity;
 import com.ssafy.ssafitlife.activity.model.dto.SaveActivity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
     private final ActivityDao activityDao;
+
+    ActivityServiceImpl(ActivityDao activityDao) {
+        this.activityDao = activityDao;
+    }
 
     @Override
     public List<Activity> getAllActivities() {
@@ -29,13 +31,31 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional
-    public void updateSaveActivity(SaveActivity activity) {
-        activityDao.updateSaveActivity(activity);
+    public void saveActivities(List<SaveActivity> activities) {
+        if (!activities.isEmpty()) {
+            activityDao.deleteActivitiesByDate(activities.get(0).getMemNo(),
+                    activities.get(0).getActDate());
+            activities.forEach(activityDao::insertSaveActivity);
+        }
     }
 
     @Override
-    @Transactional
-    public void deleteSaveActivity(Long saveActNo) {
-        activityDao.deleteSaveActivity(saveActNo);
+    public void registerActivity(Activity activity) {
+        activityDao.insertActivity(activity);
+    }
+
+    @Override
+    public void updateActivity(Activity activity) {
+        activityDao.updateActivity(activity);
+    }
+
+    @Override
+    public void deleteActivity(Long actNo) {
+        activityDao.deleteActivity(actNo);
+    }
+
+    @Override
+    public List<Activity> getRegisteredActivities(Integer memNo) {
+        return activityDao.selectRegisteredActivities(memNo);
     }
 }

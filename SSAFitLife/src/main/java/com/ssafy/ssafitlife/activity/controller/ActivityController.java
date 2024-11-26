@@ -19,31 +19,63 @@ public class ActivityController {
         this.activityService = activityService;
     }
 
-    // 전체 운동 목록 조회
+    // 전체 활동 목록 조회
     @GetMapping("/list")
     public ResponseEntity<List<Activity>> getAllActivities() {
         return ResponseEntity.ok(activityService.getAllActivities());
     }
 
-    // 특정 날짜의 저장된 활동 조회
+    // 특정 날짜의 활동 조회
     @GetMapping("/{date}")
-    public ResponseEntity<List<SaveActivity>> getActivities(@PathVariable String date, @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<List<SaveActivity>> getActivities(@PathVariable String date,
+                                                            @AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(activityService.getActivitiesByDate(date, user.getMemNo()));
     }
 
-    // 저장된 활동 수정
-    @PutMapping("/save/{saveActNo}")
-    public ResponseEntity<String> updateSaveActivity(@PathVariable Long saveActNo, @RequestBody SaveActivity activity, @AuthenticationPrincipal CustomUserDetails user) {
+    // 활동 저장
+    @PostMapping("/{date}")
+    public ResponseEntity<Void> saveActivities(@PathVariable String date,
+                                               @RequestBody List<SaveActivity> activities,
+                                               @AuthenticationPrincipal CustomUserDetails user) {
+        activities.forEach(activity -> {
+            activity.setMemNo(user.getMemNo());
+            activity.setActDate(date);
+        });
+        activityService.saveActivities(activities);
+        return ResponseEntity.ok().build();
+    }
+
+    // 활동 등록
+    @PostMapping
+    public ResponseEntity<String> registerActivity(@RequestBody Activity activity,
+                                                   @AuthenticationPrincipal CustomUserDetails user) {
         activity.setMemNo(user.getMemNo());
-        activity.setSaveActNo(saveActNo);
-        activityService.updateSaveActivity(activity);
+        activity.setActCalorie(activity.getActInten() * 50);
+        activityService.registerActivity(activity);
+        return ResponseEntity.ok("활동이 등록되었습니다.");
+    }
+
+    // 활동 수정
+    @PutMapping("/{actNo}")
+    public ResponseEntity<String> updateActivity(@PathVariable Long actNo,
+                                                 @RequestBody Activity activity,
+                                                 @AuthenticationPrincipal CustomUserDetails user) {
+        activity.setActNo(actNo);
+        activity.setMemNo(user.getMemNo());
+        activity.setActCalorie(activity.getActInten() * 50);
+        activityService.updateActivity(activity);
         return ResponseEntity.ok("활동이 수정되었습니다.");
     }
 
-    // 저장된 활동 삭제
-    @DeleteMapping("/save/{saveActNo}")
-    public ResponseEntity<String> deleteSaveActivity(@PathVariable Long saveActNo) {
-        activityService.deleteSaveActivity(saveActNo);
+    // 활동 삭제
+    @DeleteMapping("/{actNo}")
+    public ResponseEntity<String> deleteActivity(@PathVariable Long actNo) {
+        activityService.deleteActivity(actNo);
         return ResponseEntity.ok("활동이 삭제되었습니다.");
+    }
+
+    @GetMapping("/registered")
+    public ResponseEntity<List<Activity>> getRegisteredActivities(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(activityService.getRegisteredActivities(user.getMemNo()));
     }
 }

@@ -36,15 +36,18 @@
         </div>
         <div class="metabolism-item">
           <span class="label">활동대사량</span>
-          <span class="value">{{ calculateActivityMetabolism() }} kcal</span>
+          <span class="value">{{ activityMetabolism }} kcal</span>
         </div>
         <div class="metabolism-item">
           <span class="label">총 대사량</span>
-          <span class="value">{{ calculateTotalMetabolism() }} kcal</span>
+          <span class="value">{{ totalMetabolism }} kcal</span>
         </div>
       </div>
       <div class="time-info">
         <span>활동시간: {{ totalActivityHours }}/24 시간</span>
+        <div class="time-warning" v-if="totalActivityHours !== 24">
+          하루 24시간을 모두 입력해야 저장할 수 있습니다.
+        </div>
       </div>
     </div>
 
@@ -55,14 +58,17 @@
              :key="index"
              class="activity-item">
           <div class="activity-info">
-            <span class="activity-name">{{ activity.actName }}</span>
+            <span class="activity-name">
+              {{ activity.activity?.actName }}
+              ({{ activity.activity?.actInten * 50 * activity.actTime }} kcal)
+            </span>
             <span class="activity-duration">{{ activity.actTime }}시간</span>
           </div>
           <button @click="removeActivity(index)" class="remove-btn">×</button>
         </div>
       </div>
       <div class="button-group">
-        <button @click="openActivityModal" class="action-btn add-btn">
+        <button @click="isModalOpen = true" class="action-btn add-btn">
           활동 추가
         </button>
         <button @click="saveActivities"
@@ -73,66 +79,31 @@
       </div>
     </div>
 
-    <!-- 활동 추가 모달 컴포넌트 -->
+    <!-- 활동 추가 모달 -->
     <ActivityModal
-        v-model:isOpen="isActivityModalOpen"
+        v-model:isOpen="isModalOpen"
         @activity-added="handleActivityAdded"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
 import axiosInstance from "@/plugins/axios.js"
 import ActivityModal from './ActivityModal.vue'
 
 // 상태 관리
 const currentDate = ref(new Date())
 const showDatePicker = ref(false)
-const activityModal = ref(null)
+const isModalOpen = ref(false)
 const selectedActivities = ref([])
 const dummyBasicMetabolism = 1500
 
-// API 함수
-const activityApi = {
-  getActivities(date) {
-    return axiosInstance.get(`/activity/${date}`)
-  },
-  saveActivities(date, activities) {
-    return axiosInstance.post(`/activity/${date}`, activities)
-  }
+const openActivityModal = () => {
+  isModalOpen.value = true  // .isOpen 제거
 }
 
-// Computed Properties
-const totalActivityHours = computed(() => {
-  return selectedActivities.value.reduce((sum, act) => sum + act.actTime, 0)
-})
-
-const canSaveActivities = computed(() => {
-  return selectedActivities.value.length > 0 && totalActivityHours.value <= 24
-})
-
-// Methods
-const formatDate = (date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-const formatDateForInput = (date) => formatDate(date)
-
-const getDayOfWeek = (date) => {
-  const days = ['일', '월', '화', '수', '목', '금', '토']
-  return days[date.getDay()]
-}
-
-const getDayNumber = (offset) => {
-  const date = new Date(currentDate.value)
-  date.setDate(date.getDate() + offset)
-  return date.getDate()
-}
-
+// 날짜 관련 메서드들
 const changeDate = (days) => {
   const newDate = new Date(currentDate.value)
   newDate.setDate(newDate.getDate() + days)
@@ -148,34 +119,81 @@ const handleDateSelect = (event) => {
   showDatePicker.value = false
 }
 
-const calculateActivityMetabolism = () => {
-  return selectedActivities.value.reduce((total, activity) => {
-    return total + (activity.actInten * 3.5 * 3.5 * 70 * (activity.actTime / 24))
-  }, 0).toFixed(0)
+const formatDateForInput = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-const calculateTotalMetabolism = () => {
-  return (Number(calculateActivityMetabolism()) + dummyBasicMetabolism).toFixed(0)
+const getDayOfWeek = (date) => {
+  const days = ['일', '월', '화', '수', '목', '금', '토']
+  return days[date.getDay()]
 }
 
-const openActivityModal = () => {
-  activityModal.value.isOpen = true
+// Methods
+const formatDate = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
+const getDayNumber = (offset) => {
+  const date = new Date(currentDate.value)
+  date.setDate(date.getDate() + offset)
+  return date.getDate()
+}
+
+const activityApi = {
+  getActivities(date) {
+    return axiosInstance.get(`/activity/${date}`)
+  },
+  saveActivities(date, activities) {
+    return axiosInstance.post(`/activity/${date}`, activities)
+  }
+}
+
+const totalActivityHours = computed(() => {
+  return selectedActivities.value.reduce((sum, act) => sum + act.actTime, 0)
+})
+
+// computed 속성 수정
+const canSaveActivities = computed(() => {
+  return selectedActivities.value.length > 0 && totalActivityHours.value === 24
+})
+
+// ... (기존 날짜 관련 메서드들 유지)
+
+// 활동 추가 핸들러 수정
 const handleActivityAdded = (newActivity) => {
-  selectedActivities.value.push(newActivity)
+  selectedActivities.value.push({
+    actNo: newActivity.actNo,
+    actTime: Number(newActivity.actTime),
+    activity: {
+      actName: newActivity.actName,
+      actInten: Number(newActivity.actInten)
+    }
+  })
 }
 
 const removeActivity = (index) => {
   selectedActivities.value.splice(index, 1)
 }
 
+// saveActivities 함수 수정
 const saveActivities = async () => {
   try {
+    if (totalActivityHours.value !== 24) {
+      alert('하루 24시간을 모두 입력해야 합니다.')
+      return
+    }
+
     const activities = selectedActivities.value.map(activity => ({
       actNo: activity.actNo,
       actTime: activity.actTime,
-      actDate: formatDate(currentDate.value)
+      actDate: formatDate(currentDate.value),
+      memNo: null
     }))
 
     await activityApi.saveActivities(formatDate(currentDate.value), activities)
@@ -189,21 +207,31 @@ const saveActivities = async () => {
 
 const loadActivities = async (date) => {
   try {
-    const { data } = await activityApi.getActivities(date)
+    const {data} = await activityApi.getActivities(date)
     selectedActivities.value = data
   } catch (error) {
     console.error('활동 데이터 로드 실패:', error)
   }
 }
 
-// Watchers
 watch(() => currentDate.value, async (newDate) => {
   await loadActivities(formatDate(newDate))
 })
 
-// Lifecycle Hooks
 onMounted(async () => {
   await loadActivities(formatDate(currentDate.value))
+})
+
+// Computed Properties
+const activityMetabolism = computed(() => {
+  return selectedActivities.value.reduce((total, activity) => {
+    if (!activity.activity) return total
+    return total + (activity.activity.actInten * 50 * activity.actTime)
+  }, 0).toFixed(0)
+})
+
+const totalMetabolism = computed(() => {
+  return (Number(activityMetabolism.value) + dummyBasicMetabolism).toFixed(0)
 })
 </script>
 
@@ -274,7 +302,7 @@ onMounted(async () => {
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .metabolism-grid {
@@ -306,7 +334,7 @@ onMounted(async () => {
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .activity-item {
@@ -368,7 +396,7 @@ onMounted(async () => {
   background: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .template-grid {
@@ -399,7 +427,7 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -521,5 +549,17 @@ onMounted(async () => {
   border-radius: 5px;
   background: white;
   z-index: 1000;
+}
+
+.time-warning {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 </style>

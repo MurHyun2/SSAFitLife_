@@ -20,15 +20,13 @@
         </association>
     </resultMap>
 
-
-    <!-- 전체 운동 목록 조회 -->
+    <!-- 전체 활동 목록 조회 -->
     <select id="selectAllActivities" resultType="Activity">
         SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
         FROM act
-        ORDER BY act_no
     </select>
 
-    <!-- 특정 날짜의 저장된 활동 조회 -->
+    <!-- 특정 날짜의 활동 조회 -->
     <select id="selectActivitiesByDate" parameterType="SaveActivity" resultMap="SaveActivityMap">
         SELECT sa.save_act_no, sa.act_time, sa.mem_no, sa.act_no, sa.act_temp_no, sa.act_date,
         a.act_name, a.act_inten, a.act_calorie, a.is_shared
@@ -38,26 +36,47 @@
         AND DATE(sa.act_date) = DATE(#{actDate})
     </select>
 
-    <!-- 활동 저장 -->
-    <insert id="insertActivity" parameterType="SaveActivity">
+    <!-- SaveActivity 저장 -->
+    <insert id="insertSaveActivity" parameterType="SaveActivity">
         INSERT INTO save_act (act_time, mem_no, act_no, act_temp_no, act_date)
         VALUES (#{actTime}, #{memNo}, #{actNo}, #{actTempNo}, #{actDate})
     </insert>
 
-    <!-- 저장된 활동 수정 -->
-    <update id="updateSaveActivity" parameterType="SaveActivity">
-        UPDATE save_act
-        SET act_time = #{actTime},
-        act_no = #{actNo},
-        act_temp_no = #{actTempNo},
-        act_date = #{actDate}
-        WHERE save_act_no = #{saveActNo}
-        AND mem_no = #{memNo}
-    </update>
-
+    <!-- 특정 날짜의 활동 삭제 -->
     <delete id="deleteActivitiesByDate">
         DELETE FROM save_act
         WHERE mem_no = #{memNo}
         AND DATE(act_date) = DATE(#{date})
     </delete>
+
+    <!-- Activity 등록 -->
+    <insert id="insertActivity" parameterType="Activity">
+        INSERT INTO act (mem_no, act_name, act_inten, act_calorie, is_shared)
+        VALUES (#{memNo}, #{actName}, #{actInten}, #{actCalorie}, #{shared})
+    </insert>
+
+    <!-- 활동 수정 -->
+    <update id="updateActivity" parameterType="Activity">
+        UPDATE act
+        SET act_name = #{actName},
+        act_inten = #{actInten},
+        act_calorie = #{actCalorie},
+        is_shared = #{shared}
+        WHERE act_no = #{actNo}
+        AND mem_no = #{memNo}
+    </update>
+
+    <!-- 활동 삭제 -->
+    <delete id="deleteActivity" parameterType="Long">
+        DELETE FROM act
+        WHERE act_no = #{actNo}
+    </delete>
+
+    <!-- 등록한 활동 조회 -->
+    <select id="selectRegisteredActivities" parameterType="Integer" resultType="Activity">
+        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
+        FROM act
+        WHERE mem_no = #{memNo}
+        ORDER BY act_no DESC
+    </select>
 </mapper>
