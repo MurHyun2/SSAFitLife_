@@ -86,12 +86,24 @@ const products = ref([
     id: 1,
     grade: 'A',
     vendor: '냉장',
-    name: '하림-자연실록 무항생제 닭가슴살 1kg',
+    name: '하림 무항생제 1등급 냉장 생 닭가슴살 1kg',
     notice: '가장 신선도가 높습니다!',
-    unitPrice: '997',
+    unitPrice: '870',
     deliveryType: '배송비',
     shippingFee: '3,500원',
-    price: 9970,
+    price: 8700,
+    link: 'https://www.coupang.com/vp/products/338481555?itemId=1078621136&vendorItemId=73568073937&src=1139000&spec=10799999&addtag=400&ctag=338481555&lptag=AF7910856&itime=20241126213058&pageType=PRODUCT&pageValue=338481555&wPcid=17174271588683832571888&wRef=&wTime=20241126213058&redirect=landing&traceid=V0-181-8a5f89eda038b262&mcid=f3356e01212142edb62402da438fa79e&placementid=&clickBeacon=&campaignid=&puidType=&contentcategory=&imgsize=&tsource=&pageid=&deviceid=&token=&contenttype=&subid=&impressionid=&campaigntype=&puid=&requestid=&contentkeyword=&subparam='
+  },
+  {
+    id: 1,
+    grade: 'A',
+    vendor: '냉장',
+    name: '하림-자연실록 무항생제 닭가슴살 1kg x 3',
+    notice: '',
+    unitPrice: '997',
+    deliveryType: '배송비',
+    shippingFee: '무료배송',
+    price: 29900,
     link: 'https://www.coupang.com/vp/products/8244230481?itemId=19165669714&vendorItemId=71730861017&q=%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B41kg+%ED%95%98%EB%A6%BC+%EC%9E%90%EC%97%B0%EC%8B%A4%EB%A1%9D&itemsCount=36&searchId=bb87f7a6c8754ad4974339db13c115a6&rank=1&searchRank=1&isAddedCart='
   },
   {

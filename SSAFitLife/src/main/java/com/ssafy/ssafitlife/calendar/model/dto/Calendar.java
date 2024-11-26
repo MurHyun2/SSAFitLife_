@@ -16,4 +16,5 @@ public class Calendar {
 	private Float bodyFatPercentage; //체지방률
 	private Integer dietNo; //식단 번호
 	private Integer SaveActNo ; //활동 저장 번호
+
 }

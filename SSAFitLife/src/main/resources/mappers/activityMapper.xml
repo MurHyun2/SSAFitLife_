@@ -10,6 +10,7 @@
         <result property="actNo" column="act_no"/>
         <result property="actTempNo" column="act_temp_no"/>
         <result property="actDate" column="act_date"/>
+        <result property="totalMetabolism" column="total_metabolism"/>
         <association property="activity" javaType="Activity">
             <id property="actNo" column="act_no"/>
             <result property="memNo" column="mem_no"/>
@@ -28,7 +29,7 @@
 
     <!-- 특정 날짜의 활동 조회 -->
     <select id="selectActivitiesByDate" parameterType="SaveActivity" resultMap="SaveActivityMap">
-        SELECT sa.save_act_no, sa.act_time, sa.mem_no, sa.act_no, sa.act_temp_no, sa.act_date,
+        SELECT sa.save_act_no, sa.act_time, sa.mem_no, sa.act_no, sa.act_temp_no, sa.act_date, sa.total_metabolism,
         a.act_name, a.act_inten, a.act_calorie, a.is_shared
         FROM save_act sa
         JOIN act a ON sa.act_no = a.act_no
@@ -38,8 +39,8 @@
 
     <!-- SaveActivity 저장 -->
     <insert id="insertSaveActivity" parameterType="SaveActivity">
-        INSERT INTO save_act (act_time, mem_no, act_no, act_temp_no, act_date)
-        VALUES (#{actTime}, #{memNo}, #{actNo}, #{actTempNo}, #{actDate})
+        INSERT INTO save_act (act_time, mem_no, act_no, act_temp_no, act_date, total_metabolism)
+        VALUES (#{actTime}, #{memNo}, #{actNo}, #{actTempNo}, #{actDate}, #{totalMetabolism})
     </insert>
 
     <!-- 특정 날짜의 활동 삭제 -->

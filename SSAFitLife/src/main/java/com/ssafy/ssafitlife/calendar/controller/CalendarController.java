@@ -65,4 +65,5 @@ public class CalendarController {
 
         return ResponseEntity.status(HttpStatus.OK).body("몸무게 정보 삭제 완료");
     }
+
 }

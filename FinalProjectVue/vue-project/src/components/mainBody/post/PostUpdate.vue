@@ -146,9 +146,9 @@ h2 {
 }
 
 .label {
-  background-color: #b1def0;
+  background-color: #93c5fd;
   color: white;
-  padding: 8px 16px;
+  padding: 10px 3px;
   border-radius: 25px;
   font-weight: bold;
   font-size: 14px;
@@ -160,7 +160,6 @@ h2 {
 .value {
   flex: 1;
   padding: 8px;
-  color: #495057;
 }
 
 .input-field {
@@ -198,7 +197,7 @@ h2 {
 
 .btn {
   text-decoration: none;
-  padding: 8px 20px;
+  padding: 10px 3px;
   border-radius: 25px;
   font-weight: bold;
   transition: all 0.3s ease;
@@ -210,7 +209,7 @@ h2 {
 }
 
 .btn-submit {
-  background-color: #b1def0;
+  background-color: #93c5fd;
   color: white;
 }
 

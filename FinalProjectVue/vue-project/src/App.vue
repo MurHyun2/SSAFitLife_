@@ -195,6 +195,18 @@
         <div class="body-info-section">
           <h3 class="section_title">신체 정보</h3>
           <div class="info-group">
+            <label>성별</label><br>
+            <div class="gender-buttons">
+              <label class="gender-option">
+                <input type="radio" v-model="user.gender" value="0" name="gender">
+                <span class="gender-label">남성</span>
+              </label>
+              <label class="gender-option">
+                <input type="radio" v-model="user.gender" value="1" name="gender">
+                <span class="gender-label">여성</span>
+              </label>
+            </div>
+            <br>
             <label>키(cm)</label>
             <input
                 id="height"
@@ -289,6 +301,7 @@ const mypageSidePanel = async () => {
       user.value.nickname = response.data.nickname;
       user.value.phoneNumber = response.data.phoneNumber;
       user.value.height = response.data.height;
+      user.value.gender = response.data.gender;
     } catch (error) {
       console.error('사용자 정보 로딩 실패:', error);
     }
@@ -584,6 +597,7 @@ const handleSignup = async () => {
     if (response.status === 200) {
       alert('회원가입 성공');
       // 회원가입 후 로그인 화면으로 전환
+      signup.value = {};
       isSignupVisible.value = false; // 회원가입 패널 숨기기
       isLoginVisible.value = true; // 로그인 패널 보이기
     }
@@ -661,11 +675,11 @@ const saveChanges = async () => {
     userInfo.nickname = user.value.nickname;
     userInfo.phoneNumber = user.value.phoneNumber;
     userInfo.height = user.value.height;
+    userInfo.gender = user.value.gender;
 
     const response = await axiosInstance.put('/user', userInfo);
     if (response.status === 200) {
       alert('정보가 수정되었습니다');
-
     }
   } catch (error) {
     alert('정보 수정에 실패했습니다');

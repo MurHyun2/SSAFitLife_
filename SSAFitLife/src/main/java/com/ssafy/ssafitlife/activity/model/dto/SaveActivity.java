@@ -14,6 +14,7 @@ public class SaveActivity {
     private Long actNo;
     private Long actTempNo;
     private String actDate;
+    private Integer totalMetabolism; // 총대사량
 
     private Activity activity;
 }
