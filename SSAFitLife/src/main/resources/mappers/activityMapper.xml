@@ -23,8 +23,14 @@
 
     <!-- 전체 활동 목록 조회 -->
     <select id="selectAllActivities" resultType="Activity">
-        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
+        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared,
+            (
+                SELECT COUNT(*)
+                FROM save_act
+                WHERE act_no = act.act_no
+            ) AS actAddCount
         FROM act
+        ORDER BY actAddCount DESC;
     </select>
 
     <!-- 특정 날짜의 활동 조회 -->
@@ -75,7 +81,12 @@
 
     <!-- 등록한 활동 조회 -->
     <select id="selectRegisteredActivities" parameterType="Integer" resultType="Activity">
-        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
+        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared,
+            (
+                SELECT COUNT(*)
+                FROM save_act
+                WHERE act_no = act.act_no
+            ) AS actAddCount
         FROM act
         WHERE mem_no = #{memNo}
         ORDER BY act_no DESC

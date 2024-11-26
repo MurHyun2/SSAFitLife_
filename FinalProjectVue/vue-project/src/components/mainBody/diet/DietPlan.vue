@@ -654,18 +654,17 @@ tr {
 
 /* 식사 구분별 배경색 */
 tbody tr[data-meal-type="0"] {
-  background-color: rgba(255, 243, 224, 0.4); /* 아침 - 연한 초록 */
+  background-color: rgb(255, 255, 238);
 }
 
 tbody tr[data-meal-type="1"] {
-  background-color: rgba(227, 242, 253, 0.4); /* 점심 - 연한 파랑 */
+  background-color: rgb(246, 249, 255);
 }
 
 tbody tr[data-meal-type="2"] {
-  background-color: rgba(252, 228, 236, 0.4); /* 저녁 - 연한 분홍 */
+  background-color: rgb(255, 247, 247);
 }
-
 tbody tr[data-meal-type="3"] {
-  background-color: rgba(232, 245, 233, 0.4); /* 간식 - 연한 주황 */
+  background-color: rgb(248, 255, 248);
 }
 </style>

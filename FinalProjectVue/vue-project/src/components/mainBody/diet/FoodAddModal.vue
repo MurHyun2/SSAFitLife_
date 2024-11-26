@@ -47,8 +47,8 @@
             <div class="food-info">
               <div class="food-name">{{ food.foodName }}</div>
               <div class="food-details">
-                <span>{{ food.foodAmt }} g / </span>
-                <span>{{ food.foodCalorie }} kcal</span>
+                <span>{{food.foodAddCount}}회 기록</span><br>
+                <span>{{ food.foodAmt }} g / {{ food.foodCalorie }} kcal</span>
               </div>
             </div>
             <div class="nutrition-info">
@@ -146,8 +146,8 @@
             <div class="food-info">
               <div class="food-name">{{ food.foodName }}</div>
               <div class="food-details">
-                <span>{{ food.foodAmt }} g / </span>
-                <span>{{ food.foodCalorie }} kcal</span>
+                <span>{{food.foodAddCount}}회 기록</span><br>
+                <span>{{ food.foodAmt }} g / {{ food.foodCalorie }} kcal</span>
               </div>
             </div>
             <div class="nutrition-info">
@@ -617,13 +617,12 @@ watch(activeTab, () => {
 
 .quantity-input input {
   width: 80px;
-  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  text-align: right;
   font-size: 14px;
+  text-align: left; /* text-align을 left로 변경 */
+  padding-left: 12px; /* 왼쪽 패딩 추가 */
 }
-
 
 .quantity-input span {
   color: #666;
@@ -760,5 +759,135 @@ watch(activeTab, () => {
 
 .delete-button:hover {
   background: #da190b;
+}
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-button {
+  background-color: #2196f3;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  background-color: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+}
+
+.edit-button {
+  background-color: #f3f6fc;
+  color: black;
+  padding: 8px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-button:hover {
+  background-color: #cccccc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.delete-button {
+  background-color: white;
+  color: #f44336;
+  padding: 8px 16px;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delete-button:hover {
+  background-color: #f44336;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.2);
+}
+
+.quantity-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.selected-food-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quantity-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.quantity-input input {
+  width: 80px;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-image: linear-gradient(#fff, #fff), linear-gradient(120deg, #2196f3, #4CAF50);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.quantity-input input:focus {
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+  transform: translateY(-1px);
+}
+
+.quantity-input input:hover {
+  background-image: linear-gradient(#fff, #fff), linear-gradient(120deg, #4CAF50, #2196f3);
+}
+
+.quantity-input span {
+  color: #666;
+  font-size: 15px;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+/* 숫자 입력 화살표 스타일링 */
+.quantity-input input::-webkit-inner-spin-button,
+.quantity-input input::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 24px;
+  cursor: pointer;
 }
 </style>

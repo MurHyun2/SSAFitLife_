@@ -14,4 +14,5 @@ public class Activity {
 	private Float actInten;
 	private Float actCalorie;
 	private boolean isShared;
+	private Integer actAddCount;
 }
