@@ -32,7 +32,7 @@
       <div class="metabolism-grid">
         <div class="metabolism-item">
           <span class="label">기초대사량</span>
-          <span class="value">{{ dummyBasicMetabolism }} kcal</span>
+          <span class="value">{{ basicMetabolism }} kcal</span>
         </div>
         <div class="metabolism-item">
           <span class="label">활동대사량</span>
@@ -60,7 +60,7 @@
           <div class="activity-info">
             <span class="activity-name">
               {{ activity.activity?.actName }}
-              ({{ activity.activity?.actInten * 50 * activity.actTime }} kcal)
+              ({{ activity.activity?.actInten * lastWeight * activity.actTime }} kcal)
             </span>
             <span class="activity-duration">{{ activity.actTime }}시간</span>
           </div>
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watch, onMounted} from 'vue'
+import {ref, computed, watch, onMounted, reactive} from 'vue'
 import axiosInstance from "@/plugins/axios.js"
 import ActivityModal from './ActivityModal.vue'
 
@@ -97,7 +97,7 @@ const currentDate = ref(new Date())
 const showDatePicker = ref(false)
 const isModalOpen = ref(false)
 const selectedActivities = ref([])
-const dummyBasicMetabolism = 1500
+const basicMetabolism = ref(1500)
 
 const openActivityModal = () => {
   isModalOpen.value = true  // .isOpen 제거
@@ -165,16 +165,8 @@ const canSaveActivities = computed(() => {
 
 // ... (기존 날짜 관련 메서드들 유지)
 
-// 활동 추가 핸들러 수정
 const handleActivityAdded = (newActivity) => {
-  selectedActivities.value.push({
-    actNo: newActivity.actNo,
-    actTime: Number(newActivity.actTime),
-    activity: {
-      actName: newActivity.actName,
-      actInten: Number(newActivity.actInten)
-    }
-  })
+  selectedActivities.value.push(newActivity)
 }
 
 const removeActivity = (index) => {
@@ -193,7 +185,7 @@ const saveActivities = async () => {
       actNo: activity.actNo,
       actTime: activity.actTime,
       actDate: formatDate(currentDate.value),
-      memNo: null
+      totalMetabolism: totalMetabolism.value,
     }))
 
     await activityApi.saveActivities(formatDate(currentDate.value), activities)
@@ -219,20 +211,71 @@ watch(() => currentDate.value, async (newDate) => {
 })
 
 onMounted(async () => {
-  await loadActivities(formatDate(currentDate.value))
-})
+  try {
+    await loadActivities(formatDate(currentDate.value));
+    await loadWeightData();
+    await getUserInfo();
+
+    if (userInfo && lastWeight.value) {
+      basicMetabolism.value =
+          (10 * lastWeight.value) +
+          (6.25 * userInfo.height) -
+          (5 * 10) -
+          (161 * userInfo.gender);
+    }
+  } catch (error) {
+    console.error('초기화 중 오류 발생:', error);
+  }
+});
+
 
 // Computed Properties
 const activityMetabolism = computed(() => {
   return selectedActivities.value.reduce((total, activity) => {
     if (!activity.activity) return total
-    return total + (activity.activity.actInten * 50 * activity.actTime)
+    return total + (activity.activity.actInten * lastWeight.value * activity.actTime)
   }, 0).toFixed(0)
 })
 
 const totalMetabolism = computed(() => {
-  return (Number(activityMetabolism.value) + dummyBasicMetabolism).toFixed(0)
+  return (Number(activityMetabolism.value) + basicMetabolism.value).toFixed(0)
 })
+
+// 체중 데이터 로드 함수
+const lastWeight = ref(65);
+
+const loadWeightData = async () => {
+  try {
+    const response = await axiosInstance.get(`/calendar/weight-data`);
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      // 첫 번째 몸무게 저장
+      lastWeight.value = response.data[0].weight;
+    }
+  } catch (error) {
+    console.error('데이터 로딩 실패:', error);
+    lastWeight.value = null;
+  }
+};
+
+
+// 유저 정보 호출 함수
+const userInfo = reactive({
+  birthday: '',
+  gender: '',
+  height: '',
+});
+
+const getUserInfo = async () => {
+  try {
+    const response = await axiosInstance.get('/user/userInfo');
+    // 응답 데이터를 userInfo에 직접 할당
+    userInfo.birthday = response.data.birthday;
+    userInfo.gender = response.data.gender;
+    userInfo.height = response.data.height;
+  } catch (error) {
+    console.error('사용자 정보 로딩 실패:', error);
+  }
+}
 </script>
 
 <style scoped>

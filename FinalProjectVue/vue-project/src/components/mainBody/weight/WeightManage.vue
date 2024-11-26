@@ -17,7 +17,7 @@
             <label>날짜</label>
             <div class="date-input-container">
               <!-- 이전 날짜 버튼 -->
-              <button class="date-arrow" @click="changeDate(-1)">←</button>
+              <button class="nav-btn" @click="changeDate(-1)">◀</button>
               <!-- 날짜 선택 입력 -->
               <input
                   type="date"
@@ -25,7 +25,7 @@
                   :max="getCurrentDate()"
               >
               <!-- 다음 날짜 버튼 -->
-              <button class="date-arrow" @click="changeDate(1)">→</button>
+              <button class="nav-btn" @click="changeDate(1)">▶</button>
             </div>
           </div>
 
@@ -116,12 +116,10 @@ function changeDate(days) {
   };
 }
 
-// 현재 날짜 기준 한 달 체중 변화 추세 계산 함수
 function calculateWeightTrends() {
   const currentDate = new Date();
   const oneMonthAgo = new Date(currentDate);
   oneMonthAgo.setMonth(currentDate.getMonth() - 1);
-  oneMonthAgo.setHours(0, 0, 0, 0);
 
   const filteredData = weightData.value.filter(d => {
     const dataDate = new Date(d.date);
@@ -149,10 +147,14 @@ function calculateWeightTrends() {
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
 
-  const daysPassed = (new Date(sortedData[sortedData.length - 1].date) - new Date(sortedData[0].date)) / (1000 * 60 * 60 * 24);
+  // 월간 체중 변화량 계산: (마지막 체중 - 첫 번째 체중)
   const totalChange = lastWeight - firstWeight;
-  const monthlyChange = (daysPassed > 0) ? (totalChange / daysPassed * 30) : 0;
-  const weeklyChange = monthlyChange / 4.345;
+
+  // 월간 체중 변화량
+  const monthlyChange = totalChange;
+
+  // 주간 체중 변화량 (월간 변화량을 4주로 나누기)
+  const weeklyChange = (monthlyChange / 4.345).toFixed(1);  // 4주 기준으로 나누기
 
   let trend = 'stable';
   let recommendation = '';
@@ -171,7 +173,7 @@ function calculateWeightTrends() {
 
   return {
     monthlyChange: monthlyChange.toFixed(1),
-    weeklyChange: weeklyChange.toFixed(1),
+    weeklyChange: weeklyChange,  // 주간 체중 변화량
     averageWeight: avgWeight.toFixed(1),
     minWeight: minWeight.toFixed(1),
     maxWeight: maxWeight.toFixed(1),
@@ -182,6 +184,7 @@ function calculateWeightTrends() {
     consistency: (weights.length / 30 * 100).toFixed(1)
   };
 }
+
 
 
 // 추세선 계산 함수
@@ -527,6 +530,13 @@ watch(() => newEntry.value.date, (newDate) => {
 .trend-item h3 {
   margin: 0;
   color: #333;
+  font-size: 16px;
+}
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
   font-size: 16px;
 }
 </style>

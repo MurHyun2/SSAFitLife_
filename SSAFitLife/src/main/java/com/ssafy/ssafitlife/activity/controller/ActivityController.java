@@ -32,7 +32,7 @@ public class ActivityController {
         return ResponseEntity.ok(activityService.getActivitiesByDate(date, user.getMemNo()));
     }
 
-    // 활동 저장
+    // 활동 리스트 저장
     @PostMapping("/{date}")
     public ResponseEntity<Void> saveActivities(@PathVariable String date,
                                                @RequestBody List<SaveActivity> activities,
@@ -74,6 +74,7 @@ public class ActivityController {
         return ResponseEntity.ok("활동이 삭제되었습니다.");
     }
 
+    // 등록한 활동 검색
     @GetMapping("/registered")
     public ResponseEntity<List<Activity>> getRegisteredActivities(@AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(activityService.getRegisteredActivities(user.getMemNo()));

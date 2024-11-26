@@ -153,7 +153,7 @@ const now = new Date();
 now.setHours(now.getHours() + 9); // UTC에서 한국 시간(KST)으로 변환
 const selectedDate = ref(now.toISOString().split('T')[0]);
 const selectedMealType = ref('all')
-const targetCalories = ref(2800)
+const targetCalories = ref(2600)
 
 // 식사 타입 정의
 const mealTypes = [
@@ -324,7 +324,9 @@ watch(() => route.path, async (path) => {
       currentMenu.value = menu || '';
       currentView.value = view || '';
       if (menu === 'diet-manage') {
-        await requestDietList(); // 특정 조건에서만 호출
+        await requestDietList();
+        await getUserInfo();
+        await loadActivities(format(selectedDate.value));
       }
     },
     {immediate: true}
@@ -343,6 +345,7 @@ watch(selectedDate, async (newDate) => {
     const formattedDate = format(newDate);
     const {data} = await axiosInstance.get(`/diet/${formattedDate}`, config);
     diets.value = data;
+    await loadActivities(formattedDate);
   } catch (error) {
     console.error('식단 리스트를 불러오는데 실패했습니다:', error);
   }
@@ -366,6 +369,35 @@ const saveDietList = async () => {
     console.error('식단 저장 실패:', error);
   }
 };
+
+// 총대사량
+const loadActivities = async (date) => {
+  try {
+    const response = await axiosInstance.get(`/activity/${date}`)
+
+    // 기본값 설정
+    targetCalories.value = gender.value ? 2000 : 2600;
+
+    if(response.data.length > 0 && response.data[0].totalMetabolism) {
+      targetCalories.value = response.data[0].totalMetabolism;
+    }
+  } catch (error) {
+    console.error('활동 데이터 로드 실패:', error)
+  }
+}
+
+// 유저 정보 호출 함수
+const gender = ref(0)
+
+const getUserInfo = async () => {
+  try {
+    const response = await axiosInstance.get('/user/userInfo');
+    // 응답 데이터를 userInfo에 직접 할당
+    gender.value = response.data.gender;
+  } catch (error) {
+    console.error('사용자 정보 로딩 실패:', error);
+  }
+}
 </script>
 
 <style scoped>

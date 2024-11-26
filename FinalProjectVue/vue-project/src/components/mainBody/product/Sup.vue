@@ -61,19 +61,19 @@
         <div class="info-panel">
           <div class="info-section">
             <h3>섭취량</h3>
-            <p>체중 1kg당 1.6-2g</p>
+            <p>{{ categoryInfo[selectedCategory].intake }}</p>
           </div>
           <div class="info-section">
             <h3>코멘트</h3>
-            <p>초보자는 2g이 좋다, 흰우유(500ml)를 잘 못먹으면 WPI, 잘 먹으면 WPC, 적당히 잘 먹으면 WPI+WPC</p>
+            <p>{{ categoryInfo[selectedCategory].comment }}</p>
           </div>
           <div class="info-section">
             <h3>대상</h3>
-            <p>단백질을 잘 못챙겨먹는 사람</p>
+            <p>{{ categoryInfo[selectedCategory].target }}</p>
           </div>
           <div class="message-box">
             <span class="emoji">😊</span>
-            <p>운동후 섭취 혹은 단백질이 적은 식사 후, 운동후 식사가 바로 못다면 20g, 운동후 식사가 바로 된다면 40g 되시 3/4컵 바로 먹고 1/4은 30분후 섭취.</p>
+            <p>{{ categoryInfo[selectedCategory].message }}</p>
           </div>
         </div>
       </div>
@@ -162,7 +162,69 @@ const products = {
     { id: 2, name: '스포츠리서치, 오메가3, 937mg, TG', icon: '🍀' , link: 'https://iherb.co/eLD5Be3' },
     { id: 3, name: '스포츠리서치 오메가3 937mg TG', icon: '🚀' , link: 'https://coupa.ng/bDWYgW' },
   ]
-  // 다른 카테고리의 제품들도 여기에 추가할 수 있습니다
+};
+
+const categoryInfo = {
+  protein: {
+    intake: "체중 1kg당 1.6-2g",
+    comment: "초보자는 2g이 좋다, 흰우유(500ml)를 잘 못먹으면 WPI, 잘 먹으면 WPC, 적당히 잘 먹으면 WPI+WPC",
+    target: "단백질을 잘 못챙겨먹는 사람",
+    message: "운동후 섭취 혹은 단백질이 적은 식사 후, 운동후 식사가 바로 못다면 20g, 운동후 식사가 바로 된다면 40g 되시 3/4컵 바로 먹고 1/4은 30분후 섭취"
+  },
+  carb: {
+    intake: "운동 전후 30-50g",
+    comment: "운동 전후 빠른 흡수 탄수화물로 섭취, 식사 대용으로도 활용 가능",
+    target: "운동 전후 에너지가 필요한 사람",
+    message: "운동 30분 전 30g, 운동 직후 50g 섭취 권장. 일반 식사 대용으로는 40-60g 섭취"
+  },
+  vitamin: {
+    intake: "1일 1회",
+    comment: "공복에 섭취시 흡수율이 높음, 지용성 비타민은 식사와 함께 섭취",
+    target: "영양 보충이 필요한 모든 사람",
+    message: "아침 식사와 함께 섭취하는 것을 추천, 지속적인 섭취가 중요"
+  },
+  probiotic: {
+    intake: "1일 1회, 50억 유산균",
+    comment: "공복에 섭취 권장, 물과 함께 섭취",
+    target: "장 건강이 필요한 사람",
+    message: "아침 공복에 섭취하고 30분 후 식사하는 것이 가장 효과적"
+  },
+  caffeine: {
+    intake: "운동 30분 전 200-400mg",
+    comment: "개인의 민감도에 따라 조절 필요, 오후 늦게는 피할 것",
+    target: "운동 전 에너지가 필요한 사람",
+    message: "처음에는 100mg부터 시작하여 점진적으로 늘리는 것을 추천"
+  },
+  creatine: {
+    intake: "1일 5g",
+    comment: "로딩 필요없음, 꾸준한 섭취가 중요",
+    target: "근력운동을 하는 모든 사람",
+    message: "운동 전후 상관없이 매일 같은 시간에 섭취하는 것이 중요"
+  },
+  betaAlanine: {
+    intake: "1일 4-6g",
+    comment: "처음에는 저용량부터 시작, 따끔거림은 정상",
+    target: "고강도 운동을 하는 사람",
+    message: "2-3회로 나누어 섭취하면 따끔거림을 줄일 수 있음"
+  },
+  vitaminD: {
+    intake: "1일 2000-5000IU",
+    comment: "지용성이므로 식사와 함께 섭취",
+    target: "실내 생활이 많은 사람",
+    message: "아침 식사와 함께 섭취하는 것을 추천, K2와 함께 섭취시 시너지"
+  },
+  calcium: {
+    intake: "1일 1000-1200mg",
+    comment: "비타민D와 함께 섭취시 흡수율 증가",
+    target: "뼈 건강이 필요한 사람",
+    message: "아침, 저녁으로 나누어 섭취하는 것이 효과적"
+  },
+  omega3: {
+    intake: "1일 1000-3000mg",
+    comment: "EPA+DHA 합산 기준, 식사와 함께 섭취",
+    target: "염증 관리, 건강한 신체 기능이 필요한 사람",
+    message: "식사와 함께 섭취하면 흡수율이 높아짐"
+  }
 };
 
 const currentTab = ref('beginner');
@@ -184,6 +246,10 @@ const changeTab = (tabId) => {
 const selectCategory = (categoryId) => {
   selectedCategory.value = categoryId;
 };
+
+const currentInfo = computed(() => {
+  return categoryInfo[selectedCategory.value] || categoryInfo.protein;
+});
 </script>
 
 <style scoped>
@@ -273,13 +339,6 @@ const selectCategory = (categoryId) => {
   margin-left: 10px;
 }
 
-.detail-btn {
-  padding: 5px 10px;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
 .info-panel {
   background-color: #f8f9fa;
   padding: 20px;
@@ -303,5 +362,29 @@ const selectCategory = (categoryId) => {
 
 .emoji {
   font-size: 24px;
+}
+
+.detail-btn {
+  padding: 8px 15px;
+  border: none;
+  background-color: #9fd0fd;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.detail-btn:hover {
+  background-color: #5aaff6;
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.detail-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 </style>
