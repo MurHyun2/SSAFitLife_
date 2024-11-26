@@ -37,8 +37,10 @@
       </div>
 
       <div class="button-group">
-        <RouterLink class="btn btn-update" :to="{ name: 'postUpdate'}">수정</RouterLink>
-        <RouterLink class="btn btn-delete" :to="{name: 'posts'}" @click="requestPostDelete">삭제</RouterLink>
+        <template v-if="list.isWriter">
+          <RouterLink class="btn btn-update" :to="{ name: 'postUpdate'}">수정</RouterLink>
+          <RouterLink class="btn btn-delete" :to="{name: 'posts'}" @click="requestPostDelete">삭제</RouterLink>
+        </template>
         <RouterLink class="btn btn-list" :to="{name: 'posts'}">목록</RouterLink>
       </div>
     </div>
@@ -59,13 +61,22 @@ const list = ref({});
 const commentList = ref({});
 
 const requestPostDetail = async () => {
-  const {data} = await axiosInstance.get(`http://localhost:8080/post/post/${postNo.value}`);
+  const {data} = await axiosInstance.get(`/post/post/${postNo.value}`);
   list.value = data;
 }
 
 const requestPostDelete = async () => {
-  await axiosInstance.delete(`http://localhost:8080/post/post/${postNo.value}`);
-  window.location.reload();
+  const isConfirmed = confirm('정말 삭제하시겠습니까?');
+
+  if (isConfirmed) {
+    try {
+      await axiosInstance.delete(`/post/post/${postNo.value}`);
+      window.location.reload();
+    } catch (error) {
+      console.error('삭제 실패:', error);
+      alert('삭제에 실패했습니다.');
+    }
+  }
 }
 
 watch(() => route.path, async (path) => {

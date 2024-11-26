@@ -138,25 +138,11 @@
 
       <!-- 등록한 식품 폼 -->
       <div v-if="activeTab === '등록한 식품'">
-        <!-- 검색 영역 -->
         <div class="search-section">
-          <input
-              type="text"
-              v-model="registeredSearchKeyword"
-              placeholder="등록한 음식 검색"
-              class="search-input"
-              @input="searchRegisteredFood"
-          />
+          <input type="text" v-model="registeredSearchKeyword" placeholder="등록한 음식 검색" class="search-input" @input="searchRegisteredFood" />
         </div>
-
-        <!-- 검색 결과 목록 -->
         <div class="search-results">
-          <div
-              v-for="food in registeredSearchResults"
-              :key="food.foodNo"
-              class="food-item"
-              :class="{ 'selected': selectedFood?.foodNo === food.foodNo }"
-          >
+          <div v-for="food in registeredSearchResults" :key="food.foodNo" class="food-item" :class="{ 'selected': selectedFood?.foodNo === food.foodNo }" @click="selectFood(food)">
             <div class="food-info">
               <div class="food-name">{{ food.foodName }}</div>
               <div class="food-details">
@@ -178,16 +164,38 @@
                 <span>{{ food.foodFat }}g</span>
               </div>
             </div>
-            <div class="action-buttons">
+            <div class="action-buttons" @click.stop>
+              <button class="add-button" @click="selectFood(food)">+</button>
               <button class="edit-button" @click="editFood(food)">수정</button>
               <button class="delete-button" @click="deleteFood(food)">삭제</button>
             </div>
           </div>
-          <div v-if="loading" class="loading">로딩 중...</div>
         </div>
-          <div class="modal-buttons">
-            <button @click="closeModal" class="cancel-btn">취소</button>
+
+        <!-- 선택된 음식 수량 입력 -->
+        <div v-if="selectedFood" class="quantity-section">
+          <div class="selected-food-info">
+            <span>{{ selectedFood.foodName }}</span>
+            <div class="quantity-input">
+              <input type="number" v-model="quantity" min="0.1" step="0.1"/>
+              <span>인분</span>
+            </div>
           </div>
+        </div>
+
+        <!-- 식사 구분 선택 -->
+        <div v-if="selectedFood" class="meal-type-selection">
+          <button v-for="type in mealTypes" :key="type.id"
+                  :class="['meal-type-btn', { active: selectedMealType === type.id }]"
+                  @click="selectedMealType = type.id">
+            {{ type.name }}
+          </button>
+        </div>
+
+        <div class="modal-buttons">
+          <button @click="closeModal" class="cancel-btn">취소</button>
+          <button @click="addFood" class="confirm-btn" :disabled="!canAdd">추가하기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -443,6 +451,11 @@ const loadRegisteredFoods = async () => {
   }
 }
 
+watch(activeTab, () => {
+  selectedFood.value = null;
+  quantity.value = 1;
+  selectedMealType.value = null;
+});
 </script>
 
 <style scoped>
@@ -747,5 +760,53 @@ const loadRegisteredFoods = async () => {
 .delete-button:hover {
   background: #da190b;
 }
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 400px;  /* 500px에서 400px로 축소 */
+  border-radius: 16px;
+  padding: 16px;     /* 24px에서 16px로 축소 */
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
 
+.activities-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;      /* 10px에서 8px로 축소 */
+  max-height: 250px; /* 300px에서 250px로 축소 */
+  margin: 0 -16px;   /* 패딩값 맞춤 */
+  padding: 0 16px;   /* 패딩값 맞춤 */
+}
+
+.activity-item {
+  padding: 12px;     /* 16px에서 12px로 축소 */
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+  background: #f8f9fa;
+}
+
+.selected-section {
+  margin: 12px 0;    /* 20px에서 12px로 축소 */
+  padding: 12px;     /* 20px에서 12px로 축소 */
+}
+
+.search-input {
+  width: calc(100% - 24px); /* 패딩값을 고려한 전체 너비 계산 */
+  padding: 10px 12px 10px 36px; /* 좌측 아이콘 공간 확보 */
+  font-size: 14px;   /* 16px에서 14px로 축소 */
+}
+
+.modal-buttons {
+  margin-top: 16px;  /* 24px에서 16px로 축소 */
+  gap: 8px;         /* 12px에서 8px로 축소 */
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 8px 16px; /* 12px 24px에서 축소 */
+  font-size: 14px;   /* 16px에서 14px로 축소 */
+}
 </style>

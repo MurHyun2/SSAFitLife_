@@ -126,7 +126,7 @@ const menus = [
 .menu {
   /* margin-left: 20px; */
   background-color: #e5f2fb;
-  height: 99vh;
+  height: 98vh;
   width: 100vh;
   margin: 8px;
   margin-left: 20px;
@@ -141,7 +141,7 @@ const menus = [
   /* flex-direction: row; */
   justify-content: center;
   align-items: center;
-  height: 99vh;
+  height: 98vh;
   /* width: 100vh; */
 }
 </style>

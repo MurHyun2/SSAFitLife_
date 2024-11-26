@@ -23,7 +23,7 @@ import MainLeftView from '@/components/main/MainLeftView.vue';
 
 .main-container {
   display: flex;
-  height: 99vh; /* 화면 전체 높이를 사용 */
+  height: 98vh; /* 화면 전체 높이를 사용 */
 }
 
 .main-left {

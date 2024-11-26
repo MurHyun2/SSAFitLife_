@@ -1,9 +1,82 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ssafitlife.activity.model.dao.ActivityDao">
+    <resultMap id="SaveActivityMap" type="SaveActivity">
+        <id property="saveActNo" column="save_act_no"/>
+        <result property="actTime" column="act_time"/>
+        <result property="memNo" column="mem_no"/>
+        <result property="actNo" column="act_no"/>
+        <result property="actTempNo" column="act_temp_no"/>
+        <result property="actDate" column="act_date"/>
+        <association property="activity" javaType="Activity">
+            <id property="actNo" column="act_no"/>
+            <result property="memNo" column="mem_no"/>
+            <result property="actName" column="act_name"/>
+            <result property="actInten" column="act_inten"/>
+            <result property="actCalorie" column="act_calorie"/>
+            <result property="shared" column="is_shared"/>
+        </association>
+    </resultMap>
 
-	
-	
+    <!-- 전체 활동 목록 조회 -->
+    <select id="selectAllActivities" resultType="Activity">
+        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
+        FROM act
+    </select>
+
+    <!-- 특정 날짜의 활동 조회 -->
+    <select id="selectActivitiesByDate" parameterType="SaveActivity" resultMap="SaveActivityMap">
+        SELECT sa.save_act_no, sa.act_time, sa.mem_no, sa.act_no, sa.act_temp_no, sa.act_date,
+        a.act_name, a.act_inten, a.act_calorie, a.is_shared
+        FROM save_act sa
+        JOIN act a ON sa.act_no = a.act_no
+        WHERE sa.mem_no = #{memNo}
+        AND DATE(sa.act_date) = DATE(#{actDate})
+    </select>
+
+    <!-- SaveActivity 저장 -->
+    <insert id="insertSaveActivity" parameterType="SaveActivity">
+        INSERT INTO save_act (act_time, mem_no, act_no, act_temp_no, act_date)
+        VALUES (#{actTime}, #{memNo}, #{actNo}, #{actTempNo}, #{actDate})
+    </insert>
+
+    <!-- 특정 날짜의 활동 삭제 -->
+    <delete id="deleteActivitiesByDate">
+        DELETE FROM save_act
+        WHERE mem_no = #{memNo}
+        AND DATE(act_date) = DATE(#{date})
+    </delete>
+
+    <!-- Activity 등록 -->
+    <insert id="insertActivity" parameterType="Activity">
+        INSERT INTO act (mem_no, act_name, act_inten, act_calorie, is_shared)
+        VALUES (#{memNo}, #{actName}, #{actInten}, #{actCalorie}, #{shared})
+    </insert>
+
+    <!-- 활동 수정 -->
+    <update id="updateActivity" parameterType="Activity">
+        UPDATE act
+        SET act_name = #{actName},
+        act_inten = #{actInten},
+        act_calorie = #{actCalorie},
+        is_shared = #{shared}
+        WHERE act_no = #{actNo}
+        AND mem_no = #{memNo}
+    </update>
+
+    <!-- 활동 삭제 -->
+    <delete id="deleteActivity" parameterType="Long">
+        DELETE FROM act
+        WHERE act_no = #{actNo}
+    </delete>
+
+    <!-- 등록한 활동 조회 -->
+    <select id="selectRegisteredActivities" parameterType="Integer" resultType="Activity">
+        SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared
+        FROM act
+        WHERE mem_no = #{memNo}
+        ORDER BY act_no DESC
+    </select>
 </mapper>

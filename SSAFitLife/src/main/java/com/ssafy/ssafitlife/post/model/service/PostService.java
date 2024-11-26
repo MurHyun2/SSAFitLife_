@@ -1,6 +1,7 @@
 package com.ssafy.ssafitlife.post.model.service;
 
 
+import com.ssafy.ssafitlife.post.model.dto.PageResponse;
 import com.ssafy.ssafitlife.post.model.dto.Post;
 import com.ssafy.ssafitlife.post.model.dto.SearchCondition;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 public interface PostService {
 	// 게시글 전체 조회
-	List<Post> getPostList();
+	PageResponse<Post> getPostList(SearchCondition condition);
 
 	// 게시글 상세조회 (클릭시 읽는거)
 	Post readPost(int postNo);
@@ -23,5 +24,5 @@ public interface PostService {
 	boolean modifyPost(Post Post);
 
 	// 검색버튼을 눌러을때 처리할 메서드
-	List<Post> search(SearchCondition condition);
+	PageResponse<Post> search(SearchCondition condition);
 }

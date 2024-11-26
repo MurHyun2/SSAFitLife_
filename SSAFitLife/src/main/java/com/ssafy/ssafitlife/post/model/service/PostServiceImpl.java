@@ -1,6 +1,7 @@
 package com.ssafy.ssafitlife.post.model.service;
 
 import com.ssafy.ssafitlife.post.model.dao.PostDao;
+import com.ssafy.ssafitlife.post.model.dto.PageResponse;
 import com.ssafy.ssafitlife.post.model.dto.Post;
 import com.ssafy.ssafitlife.post.model.dto.SearchCondition;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,12 @@ public class PostServiceImpl implements PostService {
 	
 	// 게시글 전체조회
 	@Override
-	public List<Post> getPostList() {
-		return postDao.selectAll();
+	public PageResponse<Post> getPostList(SearchCondition condition) {
+		List<Post> posts = postDao.selectAll(condition);
+		long total = postDao.getTotalCount();
+		int totalPages = (int) Math.ceil((double) total / condition.getSize());
+
+		return new PageResponse<>(posts, condition.getPage(), totalPages, total, condition.getSize());
 	}
 
 	// 게시글 상세조회
@@ -55,8 +60,11 @@ public class PostServiceImpl implements PostService {
 
 	// 게시글 검색
 	@Override
-	public List<Post> search(SearchCondition condition) {
-		return postDao.search(condition);
-	}
+	public PageResponse<Post> search(SearchCondition condition) {
+		List<Post> posts = postDao.search(condition);
+		long total = postDao.getSearchCount(condition);
+		int totalPages = (int) Math.ceil((double) total / condition.getSize());
 
+		return new PageResponse<>(posts, condition.getPage(), totalPages, total, condition.getSize());
+	}
 }

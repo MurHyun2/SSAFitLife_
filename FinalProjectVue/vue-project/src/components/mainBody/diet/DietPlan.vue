@@ -224,15 +224,15 @@ const filteredNutrition = computed(() => {
 // 차트 데이터 computed 속성으로 변경
 const chartData = computed(() => {
   const nutrition = filteredNutrition.value;
-  const total = nutrition.totalNutrition;
+  const total = nutrition.totalNutrition || 1;
 
   return {
     labels: ['탄수화물', '단백질', '지방'],
     datasets: [{
       data: [
-        Math.round((nutrition.carbCalories / total) * 100),
-        Math.round((nutrition.proteinCalories / total) * 100),
-        Math.round((nutrition.fatCalories / total) * 100)
+        total === 0 ? 0 : Math.round((nutrition.carbCalories / total) * 100),
+        total === 0 ? 0 : Math.round((nutrition.proteinCalories / total) * 100),
+        total === 0 ? 0 : Math.round((nutrition.fatCalories / total) * 100)
       ],
       backgroundColor: ['#64B5F6', '#81C784', '#E57373'],
       borderWidth: 0,
@@ -241,20 +241,22 @@ const chartData = computed(() => {
   };
 });
 
-// 영양소 상세 정보도 computed로 변경
+// 영양소 상세 정보도 같은 방식으로 수정
 const nutritionDetails = computed(() => {
   const nutrition = filteredNutrition.value;
+  const total = nutrition.totalNutrition || 1;
+
   return {
     carb: {
-      percentage: Math.round((nutrition.carbCalories / nutrition.totalNutrition) * 100),
+      percentage: total === 0 ? 0 : Math.round((nutrition.carbCalories / total) * 100),
       calories: Math.round(nutrition.carbCalories)
     },
     protein: {
-      percentage: Math.round((nutrition.proteinCalories / nutrition.totalNutrition) * 100),
+      percentage: total === 0 ? 0 : Math.round((nutrition.proteinCalories / total) * 100),
       calories: Math.round(nutrition.proteinCalories)
     },
     fat: {
-      percentage: Math.round((nutrition.fatCalories / nutrition.totalNutrition) * 100),
+      percentage: total === 0 ? 0 : Math.round((nutrition.fatCalories / total) * 100),
       calories: Math.round(nutrition.fatCalories)
     }
   };
@@ -339,7 +341,7 @@ const config = {
 watch(selectedDate, async (newDate) => {
   try {
     const formattedDate = format(newDate);
-    const {data} = await axiosInstance.get(`http://localhost:8080/diet/${formattedDate}`, config);
+    const {data} = await axiosInstance.get(`/diet/${formattedDate}`, config);
     diets.value = data;
   } catch (error) {
     console.error('식단 리스트를 불러오는데 실패했습니다:', error);

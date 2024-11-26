@@ -1,12 +1,14 @@
 package com.ssafy.ssafitlife.post.controller;
 
-import java.util.List;
 
-
+import com.ssafy.ssafitlife.post.model.dto.PageResponse;
 import com.ssafy.ssafitlife.post.model.dto.Post;
+import com.ssafy.ssafitlife.post.model.dto.SearchCondition;
 import com.ssafy.ssafitlife.post.model.service.PostService;
+import com.ssafy.ssafitlife.security.model.dto.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // @Controller + @ResponseBody
@@ -22,38 +24,66 @@ public class PostController {
 	// 게시글 전체조회
 
 	@GetMapping("/post")
-	public ResponseEntity<Object> list() {
-	    try {
-	        List<Post> list = postService.getPostList();
-	        if (!list.isEmpty())
-	            return ResponseEntity.status(HttpStatus.OK).body(list);
-	        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("조회할 게시글이 없습니다.");
-	    } catch (Exception e) {
-	        e.printStackTrace();  // 에러 발생 시 스택 트레이스를 출력
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류로 인해 게시글 불러오기에 실패했습니다.");
-	    }
+	public ResponseEntity<Object> list(@RequestParam(defaultValue = "1") int page,
+									   @RequestParam(defaultValue = "10") int size) {
+		try {
+			SearchCondition condition = new SearchCondition();
+			condition.setPage(page);
+			condition.setSize(size);
+
+			PageResponse<Post> pageResponse = postService.getPostList(condition);
+			return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("서버 오류로 인해 게시글 불러오기에 실패했습니다.");
+		}
 	}
-	// 검색
-//	@GetMapping("/post")
-//	public ResponseEntity<?> list(@ModelAttribute SearchCondition condition){
-//		System.out.println(condition);
-//		List<post> list = postService.search(condition);
-//		
-//		
-//		if(list == null || list.size() == 0) {
-//			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-//		}
-//		return new ResponseEntity<List<post>>(list, HttpStatus.OK);
-//	}
+
+	@GetMapping("/search")
+	public ResponseEntity<Object> search(@RequestParam String searchType,
+										 @RequestParam String keyword,
+										 @RequestParam(defaultValue = "1") int page,
+										 @RequestParam(defaultValue = "10") int size) {
+		try {
+			SearchCondition condition = new SearchCondition();
+			condition.setPage(page);
+			condition.setSize(size);
+
+			switch(searchType) {
+				case "제목":
+					condition.setSearchType("post_title");
+					break;
+				case "내용":
+					condition.setSearchType("post_content");
+					break;
+				case "작성자":
+					condition.setSearchType("nickname");
+					break;
+				default:
+					condition.setSearchType("post_title");
+			}
+
+			condition.setKeyword(keyword);
+			PageResponse<Post> pageResponse = postService.search(condition);
+			return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("검색 중 오류가 발생했습니다.");
+		}
+	}
 
 	// 게시글 상세보기
 	@GetMapping("/post/{postNo}")
-	public ResponseEntity<Object> detail(@PathVariable("postNo") int postNo) {
+	public ResponseEntity<Object> detail(@PathVariable("postNo") int postNo, @AuthenticationPrincipal CustomUserDetails user) {
 		System.out.println("게시글상세보기");
 		try {
 			Post post = postService.readPost(postNo);
-			if (post != null)
+
+            post.setIsWriter(post.getMemNo() == user.getMemNo());
+
+			if (post != null) {
 				return ResponseEntity.status(HttpStatus.OK).body(post);
+			}
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시글이 삭제되었거나 존재하지 않습니다");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류로 인해 게시글 불러오기에 실패했습니다.");
@@ -61,9 +91,9 @@ public class PostController {
 	}
 
 	// 게시글 등록
-	@PostMapping("/post/{memNo}")
-	public ResponseEntity<String> write(@PathVariable("memNo") int memNo, @RequestBody Post post) {
-		post.setMemNo(memNo);
+	@PostMapping("/post")
+	public ResponseEntity<String> write(@RequestBody Post post, @AuthenticationPrincipal CustomUserDetails user) {
+		post.setMemNo(user.getMemNo());
 		
 		if (postService.writePost(post))
 			return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 등록되었습니다.");
