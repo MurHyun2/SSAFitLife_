@@ -44,6 +44,7 @@
           >
             <div class="activity-info">
               <div class="activity-name">{{ activity.actName }}</div>
+              <div class="activity-details">{{ activity.actAddCount}}회 기록</div>
               <div class="activity-details">
                 <span>{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
               </div>
@@ -56,16 +57,20 @@
         <!-- 선택된 활동 정보 -->
         <div v-if="selectedActivity" class="quantity-section">
           <div class="selected-activity-info">
-            <span>{{ selectedActivity.actName }}</span>
-            <div class="duration-input">
+            <div class="activity-title">
+              <span class="selected-name">{{ selectedActivity.actName }}</span>
+              <span class="selected-met"> ({{ selectedActivity.actInten }} MET)</span>
+            </div>
+            <div class="modern-duration-input">
               <input
                   type="number"
                   v-model="duration"
                   min="0.5"
                   max="24"
                   step="0.5"
+                  class="modern-time-input"
               />
-              <span>시간</span>
+              <span class="time-label">시간</span>
             </div>
           </div>
         </div>
@@ -123,6 +128,7 @@
           >
             <div class="activity-info">
               <div class="activity-name">{{ activity.actName }}</div>
+              <div class="activity-details">{{ activity.actAddCount}}회 기록</div>
               <div class="activity-details">
                 <span class="met-badge">{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
               </div>
@@ -138,16 +144,20 @@
         <!-- 선택된 활동 정보 추가 -->
         <div v-if="selectedActivity" class="quantity-section">
           <div class="selected-activity-info">
-            <span>{{ selectedActivity.actName }} </span>
-            <div class="duration-input">
+            <div class="activity-title">
+              <span class="selected-name">{{ selectedActivity.actName }}</span>
+              <span class="selected-met"> ({{ selectedActivity.actInten }} MET)</span>
+            </div>
+            <div class="modern-duration-input">
               <input
                   type="number"
                   v-model="duration"
                   min="0.5"
                   max="24"
                   step="0.5"
+                  class="modern-time-input"
               />
-              <span>시간</span>
+              <span class="time-label">시간</span>
             </div>
           </div>
         </div>
@@ -657,5 +667,141 @@ const loadWeightData = async () => {
 
 .delete-button:hover {
   background: #da190b;
+}
+
+.quantity-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.selected-activity-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.modern-duration-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.modern-time-input {
+  width: 80px;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-image: linear-gradient(#fff, #fff),
+  linear-gradient(120deg, #2196f3, #4CAF50);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.modern-time-input:focus {
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+  transform: translateY(-1px);
+}
+
+.modern-time-input:hover {
+  background-image: linear-gradient(#fff, #fff),
+  linear-gradient(120deg, #4CAF50, #2196f3);
+}
+
+.time-label {
+  color: #666;
+  font-size: 15px;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+/* 숫자 입력 화살표 스타일링 */
+.modern-time-input::-webkit-inner-spin-button,
+.modern-time-input::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 24px;
+  cursor: pointer;
+}
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-button {
+  background: #2196f3;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-button:hover {
+  background: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+}
+
+.edit-button {
+  background-color: #f3f6fc;
+  color: black;
+  padding: 8px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-button:hover {
+  background-color: #cccccc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.delete-button {
+  background: #fff;
+  color: #f44336;
+  padding: 8px 16px;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  background: #f44336;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.2);
 }
 </style>

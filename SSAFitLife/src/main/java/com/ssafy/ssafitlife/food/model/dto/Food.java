@@ -18,4 +18,5 @@ public class Food {
     private Integer memNo;            // 작성자 회원 번호
     private Boolean isShared;      // 공유 여부
     private Long sumLikeDislike; // 좋아요 합계
+    private Integer foodAddCount;
 }

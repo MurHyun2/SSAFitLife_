@@ -9,6 +9,32 @@ select * from food;
 
 select * from act;
 
+SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared, (SELECT COUNT(*) FROM save_act WHERE act_no = act.act_no) as actAddCount
+        FROM act
+        WHERE mem_no = 1
+        ORDER BY act_no DESC;
+
+SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared,
+            (
+                SELECT COUNT(*)
+                FROM save_act
+                WHERE act_no = act.act_no
+            ) AS actAddCount
+        FROM act
+        ORDER BY actAddCount DESC;
+        
+        SELECT *, (SELECT SUM(status)
+                    FROM Food_Like_Dislike
+                    WHERE food_no = Food.food_no) sumLikeDislike,
+                    (SELECT COUNT(*)
+                FROM diet
+                WHERE food_no = food.food_no
+            ) AS foodAddCount
+        FROM Food
+        ORDER BY foodAddCount DESC;
+
+select count(*) from save_act where act_no = 32;
+
 select * from calendar;
 
 ALTER TABLE save_act
