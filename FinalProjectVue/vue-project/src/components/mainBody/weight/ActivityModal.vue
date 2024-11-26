@@ -45,7 +45,7 @@
             <div class="activity-info">
               <div class="activity-name">{{ activity.actName }}</div>
               <div class="activity-details">
-                <span>{{ activity.actInten }} MET / {{ activity.actInten * 50 }} kcal</span>
+                <span>{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
               </div>
             </div>
             <button class="add-button" @click="selectActivity(activity)">+</button>
@@ -89,7 +89,7 @@
           <input type="text" v-model="activityData.actName" placeholder="활동명을 입력하세요"/>
         </div>
         <div class="form-group">
-          <label>MET( 1 MET = 50 kcal )</label>
+          <label>MET( 1 MET = {{ lastWeight }} kcal )</label>
           <input type="number" v-model="activityData.actInten" placeholder="0"/>
         </div>
         <div class="modal-buttons">
@@ -124,7 +124,7 @@
             <div class="activity-info">
               <div class="activity-name">{{ activity.actName }}</div>
               <div class="activity-details">
-                <span class="met-badge">{{ activity.actInten }} MET / {{ activity.actInten * 50 }} kcal</span>
+                <span class="met-badge">{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
               </div>
             </div>
             <div class="action-buttons">
@@ -313,6 +313,7 @@ const loadRegisteredActivities = async () => {
     const { data } = await axiosInstance.get('/activity/registered')
     allRegisteredActivities.value = data  // 전체 데이터 저장
     registeredActivities.value = data     // 화면에 표시할 데이터
+    await loadWeightData();
   } catch (error) {
     console.error('등록한 활동 로드 실패:', error)
   }
@@ -412,6 +413,22 @@ watch(() => props.isOpen, async (newValue) => {
     await loadRegisteredActivities(true)
   }
 })
+
+// 체중 데이터 로드 함수
+const lastWeight = ref(65);
+
+const loadWeightData = async () => {
+  try {
+    const response = await axiosInstance.get(`/calendar/weight-data`);
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      // 첫 번째 몸무게 저장
+      lastWeight.value = response.data[0].weight;
+    }
+  } catch (error) {
+    console.error('데이터 로딩 실패:', error);
+    lastWeight.value = null;
+  }
+};
 </script>
 
 <style scoped>
@@ -431,7 +448,7 @@ watch(() => props.isOpen, async (newValue) => {
 .modal-content {
   background: white;
   width: 90%;
-  max-width: 400px;
+  max-width: 500px;
   border-radius: 12px;
   padding: 20px;
   max-height: 85vh;

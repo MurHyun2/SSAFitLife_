@@ -9,12 +9,23 @@ select * from food;
 
 select * from act;
 
+select * from calendar;
+
+ALTER TABLE save_act
+ADD COLUMN total_metabolism INT;
+
 ALTER TABLE save_act
 ADD COLUMN act_date DATETIME;
 
+select * from save_act;
+
+select * from user;
+
 SELECT CONSTRAINT_NAME
 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE TABLE_NAME = 'diet';
+WHERE TABLE_NAME = 'save_act';
+
+ALTER TABLE save_act DROP FOREIGN KEY save_act_ibfk_3;
 
 desc food;
 

@@ -66,7 +66,7 @@
     <!--  사용자 수정  -->
     <update id="updateUser" parameterType="User">
         UPDATE user
-        SET nickname = #{nickname}, phone_number = #{phoneNumber}, height = #{height}
+        SET nickname = #{nickname}, phone_number = #{phoneNumber}, height = #{height}, gender = #{gender}
         WHERE email = #{email}
     </update>
 

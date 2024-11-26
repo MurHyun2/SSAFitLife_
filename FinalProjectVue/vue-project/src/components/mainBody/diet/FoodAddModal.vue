@@ -325,6 +325,7 @@ const closeModal = () => {
   searchKeyword.value = '';
   searchResults.value = [];
   page.value = 1;
+  isEditMode.value = false;
 
   foodData.value = {
     foodName: '',
