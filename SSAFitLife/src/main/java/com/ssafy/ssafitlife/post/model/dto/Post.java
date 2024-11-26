@@ -13,11 +13,12 @@ import java.util.List;
 @NoArgsConstructor
 public class Post {
 	private int postNo; // 게시글번호
-
 	private String postTitle; // 게시글제목
 	private String postContent; // 게시글내용
 	private String PostCreatedDate; // 작성일
 	private String PostUpdatedDate; // 수정일
 	private int postViews; // 조회수
 	private Integer memNo; // 작성자번호
+	private String nickname;
+	private Boolean isWriter;
 }

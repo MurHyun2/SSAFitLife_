@@ -52,8 +52,8 @@
         <div class="trend-item">
           <h3>체중 분석</h3>
           <div class="trend-details">
-            <span>월간 변화: {{ weightTrends.monthlyChange }}kg</span>
-            <span>주간 변화: {{ weightTrends.weeklyChange }}kg</span>
+            <span>월간 체중 변화량: {{ weightTrends.monthlyChange }}kg</span>
+            <span>주간 체중 변화량: {{ weightTrends.weeklyChange }}kg</span>
             <span>평균 체중: {{ weightTrends.averageWeight }}kg</span>
             <span>기록 일관성: {{ weightTrends.consistency }}%</span>
             <span class="recommendation">{{ weightTrends.recommendation }}</span>
@@ -66,7 +66,7 @@
 
 <script setup>
 // 필요한 Vue 컴포지션 API와 외부 라이브러리 임포트
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, watch} from 'vue';
 import Chart from 'chart.js/auto';
 import axiosInstance from "@/plugins/axios.js";
 import 'chartjs-adapter-date-fns';
@@ -118,18 +118,16 @@ function changeDate(days) {
 
 // 현재 날짜 기준 한 달 체중 변화 추세 계산 함수
 function calculateWeightTrends() {
-  // 현재 날짜 구하기
   const currentDate = new Date();
   const oneMonthAgo = new Date(currentDate);
   oneMonthAgo.setMonth(currentDate.getMonth() - 1);
+  oneMonthAgo.setHours(0, 0, 0, 0);
 
-  // 유효한 데이터 필터링
   const filteredData = weightData.value.filter(d => {
     const dataDate = new Date(d.date);
     return d.weight !== null && !isNaN(d.weight) && dataDate >= oneMonthAgo;
   });
 
-  // 데이터가 부족한 경우
   if (filteredData.length < 2) {
     return {
       monthlyChange: 0,
@@ -143,10 +141,7 @@ function calculateWeightTrends() {
     };
   }
 
-  // 날짜순 정렬
   const sortedData = [...filteredData].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  // 기본 통계 계산
   const weights = sortedData.map(d => parseFloat(d.weight));
   const firstWeight = weights[0];
   const lastWeight = weights[weights.length - 1];
@@ -154,17 +149,11 @@ function calculateWeightTrends() {
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
 
-  // 기간 계산
-  const firstDate = new Date(sortedData[0].date);
-  const lastDate = new Date(sortedData[sortedData.length - 1].date);
-  const daysPassed = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
-
-  // 변화량 계산
+  const daysPassed = (new Date(sortedData[sortedData.length - 1].date) - new Date(sortedData[0].date)) / (1000 * 60 * 60 * 24);
   const totalChange = lastWeight - firstWeight;
   const monthlyChange = (daysPassed > 0) ? (totalChange / daysPassed * 30) : 0;
-  const weeklyChange = monthlyChange / 4.345; // 월평균 4.345주 기준
+  const weeklyChange = monthlyChange / 4.345;
 
-  // 추세 분석
   let trend = 'stable';
   let recommendation = '';
   const changePercent = (totalChange / firstWeight) * 100;
@@ -174,18 +163,10 @@ function calculateWeightTrends() {
     recommendation = '현재 체중이 안정적으로 유지되고 있습니다.';
   } else if (monthlyChange > 0) {
     trend = 'increasing';
-    if (monthlyChange > 2) {
-      recommendation = '체중 증가 속도가 다소 빠릅니다. 식단 조절을 고려해보세요.';
-    } else {
-      recommendation = '완만한 체중 증가 추세입니다.';
-    }
+    recommendation = monthlyChange > 2 ? '체중 증가 속도가 빠릅니다. 식단 조절과 운동을 고려하세요.' : '완만한 체중 증가 추세입니다.';
   } else {
     trend = 'decreasing';
-    if (monthlyChange < -2) {
-      recommendation = '체중 감소 속도가 다소 빠릅니다. 영양 섭취를 확인해보세요.';
-    } else {
-      recommendation = '건강한 체중 감소 추세입니다.';
-    }
+    recommendation = monthlyChange < -2 ? '체중 감소 속도가 빠릅니다. 영양 섭취와 건강 상태를 확인해보세요.' : '건강한 체중 감소 추세입니다.';
   }
 
   return {
@@ -198,7 +179,7 @@ function calculateWeightTrends() {
     changePercent: changePercent.toFixed(1),
     trend,
     recommendation,
-    consistency: (weights.length / 30 * 100).toFixed(1) // 한달 기준 기록 일수 비율
+    consistency: (weights.length / 30 * 100).toFixed(1)
   };
 }
 
@@ -229,40 +210,13 @@ function initChart() {
   if (chart) {
     chart.destroy();
   }
-
   if (!weightChart.value) return;
 
-  // weightData.value가 배열이 아닐 경우 빈 배열로 처리
   const dataArray = Array.isArray(weightData.value) ? weightData.value : [];
-
-  // 유효한 데이터만 필터링
   const filteredData = dataArray
       .filter(d => d.weight !== null && d.weight !== 0)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // 데이터가 없는 경우 빈 차트 표시
-  if (filteredData.length === 0) {
-    const ctx = weightChart.value.getContext('2d');
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: '체중',
-          data: [],
-          borderColor: '#36A2EB',
-          backgroundColor: '#36A2EB'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
-    return;
-  }
-
-  // 차트 생성
   const ctx = weightChart.value.getContext('2d');
   const trendLineData = calculateTrendLine(filteredData);
 
@@ -273,17 +227,13 @@ function initChart() {
       datasets: [
         {
           label: '체중',
-          data: filteredData.map(d => ({
-            x: d.date,
-            y: parseFloat(d.weight)
-          })),
+          data: filteredData.map(d => ({ x: d.date, y: parseFloat(d.weight) })),
           borderColor: '#36A2EB',
           backgroundColor: '#36A2EB',
           tension: 0.4,
           fill: false,
           spanGaps: true
-        }
-        ,
+        },
         {
           label: '추세선',
           data: trendLineData.length > 0 ? trendLineData : [],
@@ -297,29 +247,37 @@ function initChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: '체중 변화 추이',
+          font: {
+            size: 20,
+            weight: 'bold'
+          },
+          padding: {
+            top: 10,
+            bottom: 30
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      },
       scales: {
         x: {
-          type: 'category', // 카테고리 축 설정
+          type: 'category',
           adapters: {
-            date: {
-              locale: ko
-            }
+            date: { locale: ko }
           },
           min: filteredData[0]?.date,
           max: filteredData[filteredData.length - 1]?.date
         },
         y: {
           beginAtZero: false,
-          suggestedMin: filteredData.length > 0 ?
-              Math.min(...filteredData.map(d => parseFloat(d.weight))) - 1 : 0,
-          suggestedMax: filteredData.length > 0 ?
-              Math.max(...filteredData.map(d => parseFloat(d.weight))) + 1 : 100
-        }
-      },
-      plugins: {
-        tooltip: {
-          mode: 'index',
-          intersect: false
+          suggestedMin: filteredData.length > 0 ? Math.min(...filteredData.map(d => parseFloat(d.weight))) - 1 : 0,
+          suggestedMax: filteredData.length > 0 ? Math.max(...filteredData.map(d => parseFloat(d.weight))) + 1 : 100
         }
       }
     }
@@ -329,7 +287,7 @@ function initChart() {
 // 체중 데이터 로드 함수
 async function loadWeightData() {
   try {
-    const response = await axiosInstance.get(`http://localhost:8080/calendar/weight-data`);
+    const response = await axiosInstance.get(`/calendar/weight-data`);
     // 날짜 형식 변환
     weightData.value = Array.isArray(response.data) ? response.data.map(item => {
       const utcDate = new Date(item.date);
@@ -357,10 +315,10 @@ async function addWeight() {
 
     if (existingEntry) {
       // 기존 데이터 업데이트
-      await axiosInstance.put(`http://localhost:8080/calendar/weight-update`, newEntry.value);
+      await axiosInstance.put(`/calendar/weight-update`, newEntry.value);
     } else {
       // 새 데이터 추가
-      await axiosInstance.post(`http://localhost:8080/calendar/weight-add`, newEntry.value);
+      await axiosInstance.post(`/calendar/weight-add`, newEntry.value);
     }
     await loadWeightData();
   } catch(error) {
@@ -377,7 +335,9 @@ async function deleteWeight() {
 
     if (existingEntry) {
       // URL 경로에 date를 포함시켜 DELETE 요청을 보냄
-      await axiosInstance.delete(`http://localhost:8080/calendar/weight-delete/${newEntry.value.date}`);
+      await axiosInstance.delete(`/calendar/weight-delete/${newEntry.value.date}`);
+
+      await loadWeightData();
 
       const today = getCurrentDate();
       const todayEntry = weightData.value.find(entry => entry.date === today);
@@ -386,9 +346,6 @@ async function deleteWeight() {
         date: today,
         weight: todayEntry ? todayEntry.weight : null, // 현재 날짜 데이터가 있으면 몸무게 설정, 없으면 null
       };
-
-      // 데이터 다시 로드
-      await loadWeightData();
     } else {
       alert('선택한 날짜의 데이터가 없습니다.');
     }
@@ -409,6 +366,15 @@ onMounted(async () => {
   newEntry.value = {
     date: today,
     weight: todayEntry ? todayEntry.weight : null, // 현재 날짜 데이터가 있으면 몸무게 설정, 없으면 null
+  };
+});
+
+watch(() => newEntry.value.date, (newDate) => {
+  const selectedEntry = weightData.value.find(entry => entry.date === newDate);
+
+  newEntry.value = {
+    date: newDate,
+    weight: selectedEntry?.weight ?? null
   };
 });
 </script>

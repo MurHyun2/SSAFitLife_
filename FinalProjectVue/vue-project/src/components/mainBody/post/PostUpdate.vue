@@ -71,13 +71,13 @@ const postNo = ref(route.params.postNo);
 const list = ref({});
 
 const requestPostDetail = async () => {
-  const {data} = await axiosInstance.get(`http://localhost:8080/post/post/${postNo.value}`);
+  const {data} = await axiosInstance.get(`/post/post/${postNo.value}`);
   list.value = data;
 };
 
 const updatePost = async () => {
   try {
-    await axiosInstance.put(`http://localhost:8080/post/post/${postNo.value}`, {
+    await axiosInstance.put(`/post/post/${postNo.value}`, {
       postTitle: list.value.postTitle,
       postContent: list.value.postContent,
     });

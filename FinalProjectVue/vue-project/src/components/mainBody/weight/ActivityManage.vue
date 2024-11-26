@@ -9,25 +9,21 @@
       <div class="date-controls">
         <button class="nav-btn" @click="changeDate(-1)">◀</button>
         <div class="date-numbers">
-                  <span
-                      v-for="offset in [-2, -1, 0, 1, 2]"
-                      :key="offset"
-                      :class="{ active: offset === 0 }"
-                      @click="changeDateByOffset(offset)"
-                  >
-                      {{ getDayNumber(offset) }}
-                  </span>
+          <span v-for="offset in [-2, -1, 0, 1, 2]"
+                :key="offset"
+                :class="{ active: offset === 0 }"
+                @click="changeDateByOffset(offset)">
+            {{ getDayNumber(offset) }}
+          </span>
         </div>
         <button class="nav-btn" @click="changeDate(1)">▶</button>
         <button class="calendar-btn" @click="showDatePicker = true">📅</button>
-        <input
-            v-if="showDatePicker"
-            type="date"
-            :value="formatDateForInput(currentDate)"
-            @input="handleDateSelect"
-            @blur="showDatePicker = false"
-            class="date-picker"
-        >
+        <input v-if="showDatePicker"
+               type="date"
+               :value="formatDateForInput(currentDate)"
+               @input="handleDateSelect"
+               @blur="showDatePicker = false"
+               class="date-picker">
       </div>
     </div>
 
@@ -40,15 +36,18 @@
         </div>
         <div class="metabolism-item">
           <span class="label">활동대사량</span>
-          <span class="value">{{ calculateActivityMetabolism() }} kcal</span>
+          <span class="value">{{ activityMetabolism }} kcal</span>
         </div>
         <div class="metabolism-item">
           <span class="label">총 대사량</span>
-          <span class="value">{{ calculateTotalMetabolism() }} kcal</span>
+          <span class="value">{{ totalMetabolism }} kcal</span>
         </div>
       </div>
       <div class="time-info">
         <span>활동시간: {{ totalActivityHours }}/24 시간</span>
+        <div class="time-warning" v-if="totalActivityHours !== 24">
+          하루 24시간을 모두 입력해야 저장할 수 있습니다.
+        </div>
       </div>
     </div>
 
@@ -59,182 +58,52 @@
              :key="index"
              class="activity-item">
           <div class="activity-info">
-            <span class="activity-name">{{ activity.name }}</span>
-            <span class="activity-duration">{{ activity.duration }}시간</span>
+            <span class="activity-name">
+              {{ activity.activity?.actName }}
+              ({{ activity.activity?.actInten * 50 * activity.actTime }} kcal)
+            </span>
+            <span class="activity-duration">{{ activity.actTime }}시간</span>
           </div>
           <button @click="removeActivity(index)" class="remove-btn">×</button>
         </div>
       </div>
       <div class="button-group">
-        <button @click="isActivityModalOpen = true" class="action-btn add-btn">
+        <button @click="isModalOpen = true" class="action-btn add-btn">
           활동 추가
         </button>
-        <button
-            @click="saveActivities"
-            class="action-btn save-btn"
-            :disabled="!canSaveActivities">
+        <button @click="saveActivities"
+                class="action-btn save-btn"
+                :disabled="!canSaveActivities">
           저장하기
         </button>
       </div>
     </div>
 
-    <!-- 템플릿 섹션 -->
-    <div class="template-section">
-      <h3>추천 템플릿</h3>
-      <div class="template-grid">
-        <div v-for="temp in predefinedTemplates"
-             :key="temp.name"
-             class="template-card"
-             @click="loadPredefinedTemplate(temp)">
-          <h4>{{ temp.name }}</h4>
-          <p>{{ temp.description }}</p>
-        </div>
-      </div>
-    </div>
-
     <!-- 활동 추가 모달 -->
-    <div v-if="isActivityModalOpen" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>활동 추가</h3>
-          <button class="close-btn" @click="isActivityModalOpen = false">×</button>
-        </div>
-        <div class="modal-body">
-          <div class="category-tabs">
-            <button
-                v-for="cat in categories"
-                :key="cat"
-                :class="['category-btn', { active: selectedCategory === cat }]"
-                @click="selectedCategory = cat"
-            >
-              {{ cat }}
-            </button>
-          </div>
-          <div class="activities-grid">
-            <div v-for="act in filteredActivities"
-                 :key="act.id"
-                 :class="['activity-option', { selected: selectedActivity?.id === act.id }]"
-                 @click="selectActivity(act)">
-              <span>{{ act.name }}</span>
-              <span class="met-value">{{ act.met }} MET</span>
-            </div>
-          </div>
-          <div class="duration-input">
-            <label>활동 시간</label>
-            <input
-                type="number"
-                v-model="duration"
-                min="0.5"
-                max="24"
-                step="0.5"
-            >
-            <span class="unit">시간</span>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="cancel-btn" @click="isActivityModalOpen = false">취소</button>
-          <button
-              class="confirm-btn"
-              :disabled="!canAddActivity"
-              @click="addActivity"
-          >
-            추가하기
-          </button>
-        </div>
-      </div>
-    </div>
+    <ActivityModal
+        v-model:isOpen="isModalOpen"
+        @activity-added="handleActivityAdded"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
+import axiosInstance from "@/plugins/axios.js"
+import ActivityModal from './ActivityModal.vue'
 
 // 상태 관리
 const currentDate = ref(new Date())
 const showDatePicker = ref(false)
-const isActivityModalOpen = ref(false)
-const selectedCategory = ref('수면')
-const selectedActivity = ref(null)
-const duration = ref(1)
+const isModalOpen = ref(false)
 const selectedActivities = ref([])
-const dummyBasicMetabolism = 1500 // 더미 데이터
+const dummyBasicMetabolism = 1500
 
-// 카테고리 및 활동 데이터
-const categories = ['수면', '업무', '운동', '식사', '휴식']
-const activities = [
-  { id: 1, name: '수면', met: 0.95, category: '수면' },
-  { id: 2, name: '사무work', met: 1.5, category: '업무' },
-  { id: 3, name: '걷기', met: 3.5, category: '운동' },
-  { id: 4, name: '달리기', met: 8.0, category: '운동' },
-  { id: 5, name: '자전거', met: 5.0, category: '운동' },
-  { id: 6, name: '식사', met: 1.5, category: '식사' },
-  { id: 7, name: 'TV시청', met: 1.2, category: '휴식' },
-  { id: 8, name: '독서', met: 1.3, category: '휴식' }
-]
-
-// 템플릿 데이터
-const predefinedTemplates = [
-  {
-    name: '일반 사무직',
-    description: '일반적인 사무직 하루 일과',
-    activities: [
-      { id: 1, name: '수면', met: 0.95, duration: 7 },
-      { id: 2, name: '사무work', met: 1.5, duration: 8 },
-      { id: 6, name: '식사', met: 1.5, duration: 2 },
-      { id: 7, name: 'TV시청', met: 1.2, duration: 7 }
-    ]
-  },
-  {
-    name: '활동적인 일상',
-    description: '운동이 포함된 활동적인 일과',
-    activities: [
-      { id: 1, name: '수면', met: 0.95, duration: 7 },
-      { id: 3, name: '걷기', met: 3.5, duration: 2 },
-      { id: 2, name: '사무work', met: 1.5, duration: 8 },
-      { id: 6, name: '식사', met: 1.5, duration: 2 },
-      { id: 8, name: '독서', met: 1.3, duration: 5 }
-    ]
-  }
-]
-
-// 계산된 속성
-const filteredActivities = computed(() => {
-  return activities.filter(act => act.category === selectedCategory.value)
-})
-
-const totalActivityHours = computed(() => {
-  return selectedActivities.value.reduce((sum, act) => sum + act.duration, 0)
-})
-
-const canSaveActivities = computed(() => {
-  return selectedActivities.value.length > 0 && totalActivityHours.value <= 24
-})
-
-const canAddActivity = computed(() => {
-  return selectedActivity.value && duration.value > 0 && duration.value <= 24
-})
-
-// 메서드
-const formatDate = (date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+const openActivityModal = () => {
+  isModalOpen.value = true  // .isOpen 제거
 }
 
-const formatDateForInput = (date) => formatDate(date)
-
-const getDayOfWeek = (date) => {
-  const days = ['일', '월', '화', '수', '목', '금', '토']
-  return days[date.getDay()]
-}
-
-const getDayNumber = (offset) => {
-  const date = new Date(currentDate.value)
-  date.setDate(date.getDate() + offset)
-  return date.getDate()
-}
-
+// 날짜 관련 메서드들
 const changeDate = (days) => {
   const newDate = new Date(currentDate.value)
   newDate.setDate(newDate.getDate() + days)
@@ -250,45 +119,120 @@ const handleDateSelect = (event) => {
   showDatePicker.value = false
 }
 
-const calculateActivityMetabolism = () => {
-  return selectedActivities.value.reduce((total, activity) => {
-    return total + (activity.met * 3.5 * 3.5 * 70 * (activity.duration / 24))
-  }, 0).toFixed(0)
+const formatDateForInput = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-const calculateTotalMetabolism = () => {
-  return (Number(calculateActivityMetabolism()) + dummyBasicMetabolism).toFixed(0)
+const getDayOfWeek = (date) => {
+  const days = ['일', '월', '화', '수', '목', '금', '토']
+  return days[date.getDay()]
 }
 
-const selectActivity = (activity) => {
-  selectedActivity.value = activity
+// Methods
+const formatDate = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-const addActivity = () => {
-  if (canAddActivity.value) {
-    selectedActivities.value.push({
-      ...selectedActivity.value,
-      duration: duration.value
-    })
-    isActivityModalOpen.value = false
-    selectedActivity.value = null
-    duration.value = 1
+const getDayNumber = (offset) => {
+  const date = new Date(currentDate.value)
+  date.setDate(date.getDate() + offset)
+  return date.getDate()
+}
+
+const activityApi = {
+  getActivities(date) {
+    return axiosInstance.get(`/activity/${date}`)
+  },
+  saveActivities(date, activities) {
+    return axiosInstance.post(`/activity/${date}`, activities)
   }
+}
+
+const totalActivityHours = computed(() => {
+  return selectedActivities.value.reduce((sum, act) => sum + act.actTime, 0)
+})
+
+// computed 속성 수정
+const canSaveActivities = computed(() => {
+  return selectedActivities.value.length > 0 && totalActivityHours.value === 24
+})
+
+// ... (기존 날짜 관련 메서드들 유지)
+
+// 활동 추가 핸들러 수정
+const handleActivityAdded = (newActivity) => {
+  selectedActivities.value.push({
+    actNo: newActivity.actNo,
+    actTime: Number(newActivity.actTime),
+    activity: {
+      actName: newActivity.actName,
+      actInten: Number(newActivity.actInten)
+    }
+  })
 }
 
 const removeActivity = (index) => {
   selectedActivities.value.splice(index, 1)
 }
 
-const loadPredefinedTemplate = (template) => {
-  selectedActivities.value = [...template.activities]
+// saveActivities 함수 수정
+const saveActivities = async () => {
+  try {
+    if (totalActivityHours.value !== 24) {
+      alert('하루 24시간을 모두 입력해야 합니다.')
+      return
+    }
+
+    const activities = selectedActivities.value.map(activity => ({
+      actNo: activity.actNo,
+      actTime: activity.actTime,
+      actDate: formatDate(currentDate.value),
+      memNo: null
+    }))
+
+    await activityApi.saveActivities(formatDate(currentDate.value), activities)
+    alert('활동이 저장되었습니다.')
+    await loadActivities(formatDate(currentDate.value))
+  } catch (error) {
+    console.error('활동 저장 실패:', error)
+    alert('활동 저장에 실패했습니다.')
+  }
 }
 
-const saveActivities = () => {
-  // 임시 저장 동작
-  console.log('저장된 활동:', selectedActivities.value)
-  alert('활동이 저장되었습니다.')
+const loadActivities = async (date) => {
+  try {
+    const {data} = await activityApi.getActivities(date)
+    selectedActivities.value = data
+  } catch (error) {
+    console.error('활동 데이터 로드 실패:', error)
+  }
 }
+
+watch(() => currentDate.value, async (newDate) => {
+  await loadActivities(formatDate(newDate))
+})
+
+onMounted(async () => {
+  await loadActivities(formatDate(currentDate.value))
+})
+
+// Computed Properties
+const activityMetabolism = computed(() => {
+  return selectedActivities.value.reduce((total, activity) => {
+    if (!activity.activity) return total
+    return total + (activity.activity.actInten * 50 * activity.actTime)
+  }, 0).toFixed(0)
+})
+
+const totalMetabolism = computed(() => {
+  return (Number(activityMetabolism.value) + dummyBasicMetabolism).toFixed(0)
+})
 </script>
 
 <style scoped>
@@ -358,7 +302,7 @@ const saveActivities = () => {
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .metabolism-grid {
@@ -390,7 +334,7 @@ const saveActivities = () => {
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .activity-item {
@@ -452,7 +396,7 @@ const saveActivities = () => {
   background: white;
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .template-grid {
@@ -483,7 +427,7 @@ const saveActivities = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -605,5 +549,17 @@ const saveActivities = () => {
   border-radius: 5px;
   background: white;
   z-index: 1000;
+}
+
+.time-warning {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 </style>

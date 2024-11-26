@@ -6,8 +6,6 @@ import com.ssafy.ssafitlife.post.model.dto.SearchCondition;
 import java.util.List;
 
 public interface PostDao {
-	// 전체 게시글을 조회
-	List<Post> selectAll();
 
 	// ID에 해당하는 게시글 하나 가져오기
 	Post selectOne(int postNo);
@@ -28,7 +26,10 @@ public interface PostDao {
 	void updateViews(int postNo);
 
 	// 검색 기능
+	List<Post> selectAll(SearchCondition condition);
 	List<Post> search(SearchCondition condition);
+	long getTotalCount();
+	long getSearchCount(SearchCondition condition);
 
 	// 파일 정보 저장
 	void insertFile(Post Post);

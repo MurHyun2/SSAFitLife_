@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -53,7 +54,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://*:*")); // 와일드카드 포트 사용
+        configuration.setAllowedOrigins(Arrays.asList("http://192.168.210.61:5173"));
+//        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://*:*")); // 와일드카드 포트 사용
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // OPTIONS 메소드 추가
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type")); // Authorization 헤더 노출
@@ -82,8 +84,9 @@ public class SecurityConfig {
 
 
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/", "/user", "/user/**", "/reissue", "/**").permitAll()
-                .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers("/login", "/", "/reissue", "/logout", "/**", "/api/**").permitAll()
+                .requestMatchers("/").hasRole("USER")
+                .requestMatchers("/").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
         http.addFilterBefore(new JWTFilter(jwtUtil, reissueService), LoginFilter.class);
