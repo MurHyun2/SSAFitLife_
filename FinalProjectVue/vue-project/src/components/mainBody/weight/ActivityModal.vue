@@ -269,8 +269,11 @@ const addActivity = () => {
     emit('activity-added', {
       actNo: selectedActivity.value.actNo,
       actTime: duration.value,
-      actName: selectedActivity.value.actName,
-      actInten: selectedActivity.value.actInten
+      activity: {  // activity 객체 추가
+        actNo: selectedActivity.value.actNo,
+        actName: selectedActivity.value.actName,
+        actInten: selectedActivity.value.actInten
+      }
     })
     selectedActivity.value = null
     duration.value = 1

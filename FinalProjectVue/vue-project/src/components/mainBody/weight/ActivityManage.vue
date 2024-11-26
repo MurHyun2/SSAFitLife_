@@ -165,16 +165,8 @@ const canSaveActivities = computed(() => {
 
 // ... (기존 날짜 관련 메서드들 유지)
 
-// 활동 추가 핸들러 수정
 const handleActivityAdded = (newActivity) => {
-  selectedActivities.value.push({
-    actNo: newActivity.actNo,
-    actTime: Number(newActivity.actTime),
-    activity: {
-      actName: newActivity.actName,
-      actInten: Number(newActivity.actInten)
-    }
-  })
+  selectedActivities.value.push(newActivity)
 }
 
 const removeActivity = (index) => {
