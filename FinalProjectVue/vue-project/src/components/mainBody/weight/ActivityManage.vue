@@ -53,46 +53,44 @@
 
     <!-- 활동 목록 -->
     <div class="activities-section">
-      <div class="activities-section">
-        <div class="activities-list">
-          <div v-for="(activity, index) in selectedActivities"
-               :key="index"
-               class="activity-item">
-            <div class="activity-info">
+      <div class="activities-list">
+        <div v-for="(activity, index) in selectedActivities"
+             :key="index"
+             class="activity-item">
+          <div class="activity-info">
           <span class="activity-name">
             {{ activity.activity?.actName }}
-            ({{ activity.activity?.actInten}} MET
+            ({{ activity.activity?.actInten }} MET
             / {{ (activity.activity?.actInten * lastWeight * activity.actTime).toFixed(1) }} kcal)
           </span>
-              <div class="time-edit">
-                <input
-                    type="number"
-                    v-model.number="activity.actTime"
-                    min="0"
-                    max="24"
-                    step="0.5"
-                    class="modern-input"
-                    @change="validateTotalTime"
-                >
-                <span class="time-unit">시간</span>
-              </div>
+            <div class="time-edit">
+              <input
+                  type="number"
+                  v-model.number="activity.actTime"
+                  min="0"
+                  max="24"
+                  step="0.5"
+                  class="modern-input"
+                  @change="validateTotalTime"
+              >
+              <span class="time-unit">시간</span>
             </div>
-            <button @click="removeActivity(index)" class="remove-btn">×</button>
           </div>
+          <button @click="removeActivity(index)" class="remove-btn">×</button>
         </div>
       </div>
-      <div class="button-group">
-        <button @click="isModalOpen = true" class="modern-button add-btn">
-          활동 추가
-        </button>
-        <button
-            @click="saveActivities"
-            class="modern-button save-btn"
-            :disabled="!canSaveActivities"
-        >
-          저장하기
-        </button>
-      </div>
+    </div>
+    <div class="button-group">
+      <button @click="isModalOpen = true" class="modern-button add-btn">
+        활동 추가
+      </button>
+      <button
+          @click="saveActivities"
+          class="modern-button save-btn"
+          :disabled="!canSaveActivities"
+      >
+        저장하기
+      </button>
     </div>
 
     <!-- 활동 추가 모달 -->
@@ -319,36 +317,36 @@ const activityTemplates = [
   {
     name: "일반 사무직 템플릿",
     activities: [
-      { actName: "수면", actInten: 0.95, actTime: 7 },
-      { actName: "좌식 업무", actInten: 1.3, actTime: 8 },
-      { actName: "가벼운 걷기", actInten: 2.5, actTime: 1 },
-      { actName: "식사 및 휴식", actInten: 1.5, actTime: 3 },
-      { actName: "가벼운 운동", actInten: 3.0, actTime: 1 },
-      { actName: "TV 시청/독서", actInten: 1.0, actTime: 4 }
+      {actName: "수면", actInten: 0.95, actTime: 7, actNo: 51},
+      {actName: "좌식 업무", actInten: 1.3, actTime: 8, actNo: 52},
+      {actName: "가벼운 걷기", actInten: 2.5, actTime: 1, actNo: 53},
+      {actName: "식사 및 휴식", actInten: 1.5, actTime: 3, actNo: 54},
+      {actName: "가벼운 운동", actInten: 3.0, actTime: 1, actNo: 55},
+      {actName: "TV 시청/독서", actInten: 1.0, actTime: 4, actNo: 56}
     ]
   },
   {
     name: "활동적인 생활 템플릿",
     activities: [
-      { actName: "수면", actInten: 0.95, actTime: 7 },
-      { actName: "중강도 운동", actInten: 5.0, actTime: 2 },
-      { actName: "일상 활동", actInten: 2.0, actTime: 6 },
-      { actName: "식사 및 휴식", actInten: 1.5, actTime: 3 },
-      { actName: "가벼운 걷기", actInten: 2.5, actTime: 2 },
-      { actName: "여가 활동", actInten: 1.8, actTime: 4 }
+      {actName: "수면", actInten: 0.95, actTime: 7, actNo: 51},
+      {actName: "중강도 운동", actInten: 5.0, actTime: 2, actNo: 57},
+      {actName: "일상 활동", actInten: 2.0, actTime: 6, actNo: 58},
+      {actName: "식사 및 휴식", actInten: 1.5, actTime: 3, actNo: 54},
+      {actName: "가벼운 걷기", actInten: 2.5, actTime: 2, actNo: 53},
+      {actName: "여가 활동", actInten: 1.8, actTime: 4, actNo: 59}
     ]
   },
   {
     name: "재택근무 템플릿",
     activities: [
-      { actName: "수면", actInten: 0.95, actTime: 8 },
-      { actName: "재택 업무", actInten: 1.2, actTime: 8 },
-      { actName: "집안일", actInten: 2.5, actTime: 2 },
-      { actName: "식사 및 휴식", actInten: 1.5, actTime: 3 },
-      { actName: "스트레칭/요가", actInten: 2.5, actTime: 1 },
-      { actName: "휴식", actInten: 1.0, actTime: 2 }
+      {actName: "수면", actInten: 0.95, actTime: 8, actNo: 51},
+      {actName: "재택 업무", actInten: 1.2, actTime: 8, actNo: 60},
+      {actName: "집안일", actInten: 2.5, actTime: 2, actNo: 61},
+      {actName: "식사 및 휴식", actInten: 1.5, actTime: 3, actNo: 54},
+      {actName: "스트레칭/요가", actInten: 2.5, actTime: 1, actNo: 62},
+      {actName: "휴식", actInten: 1.0, actTime: 2, actNo: 63}
     ]
-  },
+  }
 ];
 
 const applyTemplate = (template) => {
@@ -363,7 +361,7 @@ const applyTemplate = (template) => {
         actInten: act.actInten
       },
       actTime: act.actTime,
-      actNo: null // 서버에서 부여될 ID
+      actNo: act.actNo,
     })
   })
 }
@@ -801,6 +799,7 @@ const applyTemplate = (template) => {
   font-size: 14px;
   font-weight: 500;
 }
+
 .button-group {
   display: flex;
   gap: 12px;
@@ -862,5 +861,4 @@ const applyTemplate = (template) => {
   background: rgba(255, 82, 82, 0.1);
   transform: rotate(90deg);
 }
-
 </style>

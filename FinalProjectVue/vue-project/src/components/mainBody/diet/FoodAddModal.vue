@@ -434,6 +434,7 @@ const deleteFood = async (food) => {
     try {
       await axiosInstance.delete(`/food/${food.foodNo}`);
       await loadRegisteredFoods();
+      selectedFood.value = null;
       alert('삭제가 완료되었습니다.')
     } catch (error) {
       console.error('식품 삭제 실패:', error);

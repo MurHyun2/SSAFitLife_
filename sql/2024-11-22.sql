@@ -9,6 +9,48 @@ select * from food;
 
 select * from act;
 
+desc act;
+
+select * from save_act;
+
+ALTER TABLE refresh_tokens DROP FOREIGN KEY refresh_tokens_ibfk_1;
+
+ALTER TABLE refresh_tokens
+ADD CONSTRAINT refresh_tokens_ibfk_1
+FOREIGN KEY (mem_no) REFERENCES user (mem_no)
+ON DELETE CASCADE;
+
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '수면', 0.9);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '좌식 업무', 1.3);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '가벼운 걷기', 2.5);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '식사 및 휴식', 1.5);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '가벼운 운동', 3.0);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, 'TV 시청/독서', 1.0);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '중강도 운동', 5.0);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '일상 활동', 2.0);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '여가 활동', 1.8);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '재택 업무', 1.2);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '집안일', 2.5);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '스트레칭/요가', 2.5);
+INSERT INTO act (mem_no, act_name, act_inten) VALUES (4, '휴식', 1.0);
+
+INSERT INTO act (mem_no, act_name, act_inten, act_calorie, is_shared) VALUES
+(1, '수면', 0.1, 50, 0),
+(1, '좌식 업무', 1.2, 100, 0),
+(1, '가벼운 걷기', 3.0, 200, 0),
+(1, '식사 및 휴식', 1.5, 150, 0),
+(1, '가벼운 운동', 4.0, 300, 0),
+(1, 'TV 시청/독서', 1.2, 80, 0),
+(1, '중강도 운동', 6.0, 500, 0),
+(1, '일상 활동', 3.0, 400, 0),
+(1, '여가 활동', 2.5, 180, 0),
+(1, '재택 업무', 1.5, 120, 0),
+(1, '집안일', 3.5, 250, 0),
+(1, '스트레칭/요가', 2.0, 180, 0),
+(1, '휴식', 1.2, 80, 0);
+
+desc act;
+
 SELECT act_no, mem_no, act_name, act_inten, act_calorie, is_shared, (SELECT COUNT(*) FROM save_act WHERE act_no = act.act_no) as actAddCount
         FROM act
         WHERE mem_no = 1
@@ -37,6 +79,15 @@ select count(*) from save_act where act_no = 32;
 
 select * from calendar;
 
+select * from save_act;
+
+delete from save_act
+WHERE mem_no = 12;
+
+select * from user;
+
+delete from user where mem_no = 13;
+
 ALTER TABLE save_act
 ADD COLUMN total_metabolism INT;
 
@@ -46,6 +97,13 @@ ADD COLUMN act_date DATETIME;
 select * from save_act;
 
 select * from user;
+
+ALTER TABLE refresh_tokens DROP FOREIGN KEY refresh_tokens_ibfk_1;
+
+ALTER TABLE refresh_tokens
+ADD CONSTRAINT refresh_tokens_ibfk_1
+FOREIGN KEY (mem_no) REFERENCES user (mem_no)
+ON DELETE CASCADE;
 
 SELECT CONSTRAINT_NAME
 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
