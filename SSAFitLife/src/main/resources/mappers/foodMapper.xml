@@ -64,5 +64,6 @@
             ) AS foodAddCount
         FROM food
         WHERE mem_no = #{memNo}
+        ORDER BY food_no DESC
     </select>
 </mapper>

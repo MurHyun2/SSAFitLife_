@@ -46,7 +46,7 @@
               <div class="activity-name">{{ activity.actName }}</div>
               <div class="activity-details">{{ activity.actAddCount}}회 기록</div>
               <div class="activity-details">
-                <span>{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
+                <span>{{ activity.actInten }} MET / {{ (activity.actInten * lastWeight).toFixed(1) }} kcal</span>
               </div>
             </div>
             <button class="add-button" @click="selectActivity(activity)">+</button>
@@ -130,7 +130,7 @@
               <div class="activity-name">{{ activity.actName }}</div>
               <div class="activity-details">{{ activity.actAddCount}}회 기록</div>
               <div class="activity-details">
-                <span class="met-badge">{{ activity.actInten }} MET / {{ activity.actInten * lastWeight }} kcal</span>
+                <span class="met-badge">{{ activity.actInten }} MET / {{ (activity.actInten * lastWeight).toFixed(1) }} kcal</span>
               </div>
             </div>
             <div class="action-buttons">
@@ -309,6 +309,7 @@ const registerActivity = async () => {
     editingActNo.value = null
 
     // 활동 목록 새로고침 후 탭 전환
+    await loadInitialData()
     await loadRegisteredActivities(true)  // true를 전달하여 처음부터 다시 로드
     activeTab.value = '등록한 활동'
 
@@ -365,6 +366,7 @@ const deleteActivity = async (activity) => {
     try {
       await axiosInstance.delete(`/activity/${activity.actNo}`)
       await loadRegisteredActivities(true)
+      selectedActivity.value = null;
       alert('활동이 삭제되었습니다.')
     } catch (error) {
       console.error('활동 삭제 실패:', error)

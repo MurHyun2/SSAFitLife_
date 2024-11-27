@@ -695,6 +695,8 @@ const deleteUser = async () => {
       const response = await axiosInstance.delete('/user'); // 요청 실행
 
       if (response.status === 200) {
+        await handleLogout();
+        isMypageVisible.value = false;
         alert('회원탈퇴가 성공적으로 처리되었습니다.');
         // 로그아웃 또는 홈 화면으로 리다이렉션
         window.location.href = '/';  // 예: 홈 화면으로 리다이렉트
@@ -1056,5 +1058,36 @@ button:disabled {
 .nav-button:hover {
   background-color: #3c9ecf;
 }
+.signup-side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 90%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  transition: transform 0.3s ease;
+  z-index: 10;
+  overflow-y: auto; /* 내용이 넘칠 경우 스크롤바 표시 */
+}
+.mypage-side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  transition: transform 0.3s ease;
+  overflow-y: auto; /* 스크롤 추가 */
+  z-index: 10;
+}
 
+/* 버튼 그룹 하단 여백 */
+.button-group {
+  margin: 20px 0;
+  padding-bottom: 20px;
+}
 </style>
