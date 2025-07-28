@@ -35,7 +35,7 @@ SSAFitLife는 사용자의 일일 활동량과 식단을 종합적으로 관리�
 - 헬스 보조제 추천
 - 닭가슴살 추천
 
-# 👨🏻‍💻 담당 업무 (Full-Stack & Team Lead)
+# 👨🏻‍💻 담당 업무 (Full-Stack & Team Leader)
 
 ## :bust_in_silhouette: 이대현
 
